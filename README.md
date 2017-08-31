@@ -28,3 +28,32 @@ app.UseFluentRouter(router => {
     router.Route("hello").To(() => "Hello World");
 });
 ```
+
+HttpContext Hello World Route:
+```CSharp
+app.UseFluentRouter(router => {
+    router.Route("hello").To(context => context.Request.Method + ": Hello World");
+});
+```
+
+Parameters:
+```CSharp
+app.UseFluentRouter(router => {
+    router.Route("hello/{type}/{id}")
+        .To((FromRoute<string> type, FromRoute<int> id) => $"Fetch: {type} with id: {id}");
+});
+```
+
+Services:
+```CSharp
+interface IMyService {
+    MyStuff Fetch(string type, int id);
+}
+
+app.UseFluentRouter(router => {
+    router.Route("hello/{type}/{id}")
+        .To((FromRoute<string> type, FromRoute<int> id, FromService<IMyService> service) => {
+            return ((TService)service).Fetch(type, id);
+        });
+});
+```
