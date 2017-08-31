@@ -12,7 +12,7 @@ Adding the services:
 ```CSharp
 services.AddFluentRouting();
 ```
-# Controller Routes
+### Controller Routes
 
 Simple Routing to Controllers:
 ```CSharp
@@ -21,7 +21,7 @@ app.UseFluentRouter(router => {
 });
 ```
 
-# Functional Routes
+### Functional Routes
 Minimal Hello World Route:
 ```CSharp
 app.UseFluentRouter(router => {
