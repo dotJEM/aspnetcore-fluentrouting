@@ -17,7 +17,7 @@ namespace Debugging.Controllers
 
         // GET api/values/5
         [HttpGet]
-        public string Get(int id)
+        public string Get([FromRoute]int id)
         {
             return "value";
         }
@@ -30,13 +30,13 @@ namespace Debugging.Controllers
 
         // PUT api/values/5
         [HttpPut]
-        public void Put(int id, [FromBody]string value)
+        public void Put([FromRoute]int id, [FromBody]string value)
         {
         }
 
         // DELETE api/values/5
         [HttpDelete]
-        public void Delete(int id)
+        public void Delete([FromRoute]int id)
         {
         }
     }
