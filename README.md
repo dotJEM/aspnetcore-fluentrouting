@@ -10,12 +10,12 @@ The main features are:
 # Examples
 
 Adding the services:
-```C#
+```CSharp
 services.AddFluentRouting();
 ```
 
 Simple Hello World
-```C#
+```CSharp
 app.UseFluentRouter(router => {
     router.Route("hello").To(() => "Hello World");
 });
