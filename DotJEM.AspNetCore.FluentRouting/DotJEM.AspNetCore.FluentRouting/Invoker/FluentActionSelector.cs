@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DotJEM.AspNetCore.FluentRouter;
 using DotJEM.AspNetCore.FluentRouter.Routing;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 
-namespace DotJEM.AspNetCore.FluentRouter
+namespace DotJEM.AspNetCore.FluentRouting.Invoker
 {
     public class FluentActionSelector : IActionSelector
     {
@@ -87,46 +89,50 @@ namespace DotJEM.AspNetCore.FluentRouter
                 //TODO: Foreach parameter => binding source => has parameter.
                 //      Also we should be able to get the information out of the binding source it self weather it can succced or not.
                 //      Otherwise, how could people implement their own binding sources?
+                //
+                //      Aditional Info: So the Binding Source will actually produce a Binding Result after we have attempted to bind.
+                //      However this happens much later in the process so that result can't be used here...
+                //      Ofc. this could be solved by attempting to bind early, but obviously that would be a heavy process as we might end addempting to bind
+                //      On allot of models before we actually find a candidate match, so...
+                
+                HashSet<string> valuenames = new HashSet<string>(Concat(
+                    context.RouteData.DataTokens.Keys,
+                    context.RouteData.Values.Keys,
+                    //context.HttpContext.Request.Form.Keys, //TODO: depends on contentType
+                    context.HttpContext.Request.Headers.Keys,
+                    context.HttpContext.Request.Query.Keys
+                    ));
 
-                switch (parameter.BindingInfo?.BindingSource?.Id)
+                BindingInfo info = parameter.BindingInfo;
+                BindingSource source = info?.BindingSource;
+
+                switch (source?.Id)
                 {
-                    case "Body":
-                        break;
-                    case "Custom":
-                        break;
                     case "Form":
-                        break;
                     case "Header":
-                        break;
-                    case "ModelBinding":
-                        break;
                     case "Path": //FromRoute
-                        if (!context.RouteData.Values.ContainsKey(parameter.Name))
-                            return false;
-                        continue;
                     case "Query":
+                    case null: //TODO: If this is a Post, Put etc route, then the Body is actually also a candidate
+                        if (!valuenames.Contains(parameter.Name))
+                            return false;
                         break;
-
+                    case "Body":
+                    case "Custom":
+                    case "ModelBinding":
                     case "Services":
-                        //Note: These are not from the request.
-                        break;
-
                     case "Special":
-                        //Note: These are not from the request.
-                        break;
-
                     case "FormFile":
-                        break;
-
-                    case null:
                         //Note: No specific binding info, we have to try them all.
                         break;
-                        
-
                 }
 
             }
             return true;
+        }
+
+        private IEnumerable<string> Concat(params IEnumerable<string>[] sources)
+        {
+            return sources.SelectMany(s => s);
         }
 
         private IReadOnlyList<ActionDescriptor> EvaluateActionConstraints(RouteContext context, IReadOnlyList<ActionDescriptor> actions)

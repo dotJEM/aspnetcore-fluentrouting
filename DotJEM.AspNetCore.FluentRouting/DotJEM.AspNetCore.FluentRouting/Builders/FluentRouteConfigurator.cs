@@ -31,40 +31,17 @@ namespace DotJEM.AspNetCore.FluentRouter
 
         }
 
-        public IFluentRouteBuilder To<T1, TResult>(Func<T1, TResult> handler)
-        {
-            return builder.AddDelegateRoute(
-                handler,
-                Name,
-                Template,
-                new RouteValueDictionary(defaults),
-                new RouteValueDictionary(constraints),
-                new RouteValueDictionary(dataTokens));
-        }
+        public IFluentRouteBuilder To<T1, TResult>(Func<T1, TResult> handler) => InternalAddDelegateRoute(handler);
 
-        public IFluentRouteBuilder To<T1, T2, TResult>(Func<T1, T2, TResult> handler)
-        {
-            return builder.AddDelegateRoute(
-                handler,
-                Name,
-                Template,
-                new RouteValueDictionary(defaults),
-                new RouteValueDictionary(constraints),
-                new RouteValueDictionary(dataTokens));
-        }
+        public IFluentRouteBuilder To<T1, T2, TResult>(Func<T1, T2, TResult> handler) => InternalAddDelegateRoute(handler);
 
-        public IFluentRouteBuilder To<TResult>(Func<TResult> handler)
-        {
-            return builder.AddDelegateRoute(
-                handler,
-                Name,
-                Template,
-                new RouteValueDictionary(defaults),
-                new RouteValueDictionary(constraints),
-                new RouteValueDictionary(dataTokens));
-        }
+        public IFluentRouteBuilder To<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> handler) => InternalAddDelegateRoute(handler);
 
-        public IFluentRouteBuilder To<TResult>(Func<HttpContext, TResult> handler)
+        public IFluentRouteBuilder To<TResult>(Func<TResult> handler) => InternalAddDelegateRoute(handler);
+
+        public IFluentRouteBuilder To<TResult>(Func<HttpContext, TResult> handler) => InternalAddDelegateRoute(handler);
+
+        private IFluentRouteBuilder InternalAddDelegateRoute(Delegate handler)
         {
             return builder.AddDelegateRoute(
                 handler,

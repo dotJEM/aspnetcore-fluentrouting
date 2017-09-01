@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -141,24 +142,12 @@ namespace DotJEM.AspNetCore.FluentRouter
             //             cachedResult.Item1, 
             //             cachedResult.Item2);
             //context.Result = (IActionInvoker)controllerActionInvoker;
-            FluentActionContext ctx = new FluentActionContext(context.ActionContext);
+            FluentActionContext ctx = context.ActionContext as FluentActionContext;
             ctx.ValueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories);
 
             (FluentActionInvokerCacheEntry entry, IFilterMetadata[] filters) = cache.Lookup(ctx);
 
             context.Result = new FluentActionInvoker(logger, diagnosticSource, ctx, entry, filters);
-
-            //var filterItems = from fd in context.ActionContext.ActionDescriptor.FilterDescriptors
-            //    select new FilterItem(fd);
-            //List<FilterItem> filterItems1 = new List<FilterItem>((IEnumerable<FilterItem>)items);
-            //IFilterMetadata[] filters = this.GetFilters((ActionContext)controllerContext, filterItems1);
-            //for (int index = 0; index < items.Count; ++index)
-            //{
-            //    FilterItem filterItem = items[index];
-            //    if (!filterItem.IsReusable)
-            //        filterItem.Filter = (IFilterMetadata)null;
-            //}
-
         }
 
 
@@ -170,11 +159,12 @@ namespace DotJEM.AspNetCore.FluentRouter
 
     public class FluentActionContext : ActionContext
     {
-        public FluentActionContext()
-        {
-        }
 
-        public FluentActionContext(ActionContext actionContext) : base(actionContext)
+
+
+
+        public FluentActionContext(HttpContext context, RouteData data, ActionDescriptor descriptor)
+            : base(context, data, descriptor)
         {
         }
 

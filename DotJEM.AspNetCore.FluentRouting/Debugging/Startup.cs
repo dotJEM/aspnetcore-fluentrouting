@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Debugging.Controllers;
 using DotJEM.AspNetCore.FluentRouter.Extentions;
+using DotJEM.AspNetCore.FluentRouter.Routing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,6 +44,14 @@ namespace Debugging
             {
                 router.Route("hello").To(() => JObject.FromObject(new {hello = "World"}));
                 router.Route("api/values/{id?}").To<ValuesController>();
+                router.Route("api/services/{param}").To((FromRoute<string> param, FromQuery<string> take, FromBody<JObject> body, FromServices<IActionSelector> selector)
+                    =>
+                {
+                    JObject entity = body;
+                    entity["param"] = param.Value;
+                    entity["take"] = take.Value;
+                    return entity;
+                });
             });
         }
     }

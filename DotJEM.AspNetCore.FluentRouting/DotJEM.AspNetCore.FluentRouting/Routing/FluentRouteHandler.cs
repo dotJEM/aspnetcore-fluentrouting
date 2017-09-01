@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DotJEM.AspNetCore.FluentRouting.Invoker;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -62,7 +63,8 @@ namespace DotJEM.AspNetCore.FluentRouter.Routing
 
             context.Handler = c =>
             {
-                ActionContext actionContext = new ActionContext(context.HttpContext, c.GetRouteData(), actionDescriptor);
+                FluentActionContext actionContext = new FluentActionContext(context.HttpContext, c.GetRouteData(), actionDescriptor);
+                //ActionContext actionContext = new ActionContext(context.HttpContext, c.GetRouteData(), actionDescriptor);
                 if (actionContextAccessor != null)
                     actionContextAccessor.ActionContext = actionContext;
                 IActionInvoker invoker = actionInvokerFactory.CreateInvoker(actionContext);
@@ -72,21 +74,5 @@ namespace DotJEM.AspNetCore.FluentRouter.Routing
             };
             return Task.CompletedTask;
         }
-        
-
-
-        //public MvcRouteHandler(IActionInvokerFactory actionInvokerFactory, IActionSelector actionSelector, DiagnosticSource diagnosticSource, ILoggerFactory loggerFactory)
-        //    : this(actionInvokerFactory, actionSelector, diagnosticSource, loggerFactory, (IActionContextAccessor)null)
-        //{
-        //}
-
-        //public MvcRouteHandler(IActionInvokerFactory actionInvokerFactory, IActionSelector actionSelector, DiagnosticSource diagnosticSource, ILoggerFactory loggerFactory, IActionContextAccessor actionContextAccessor)
-        //{
-        //    this._actionContextAccessor = actionContextAccessor;
-        //    this._actionInvokerFactory = actionInvokerFactory;
-        //    this._actionSelector = actionSelector;
-        //    this._diagnosticSource = diagnosticSource;
-        //    this._logger = (ILogger)loggerFactory.CreateLogger<MvcRouteHandler>();
-        //}
     }
 }
