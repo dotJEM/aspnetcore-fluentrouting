@@ -1,4 +1,4 @@
-namespace DotJEM.AspNetCore.FluentRouter
+namespace DotJEM.AspNetCore.FluentRouting.Builders
 {
     public interface IFluentRouteBuilder
     {

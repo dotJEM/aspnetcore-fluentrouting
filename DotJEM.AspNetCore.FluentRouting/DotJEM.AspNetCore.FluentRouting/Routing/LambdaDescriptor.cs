@@ -1,23 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace DotJEM.AspNetCore.FluentRouter.Routing
+namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
-    public class LambdaActionDescriptor : ActionDescriptor
+    public class LambdaDescriptor : ActionDescriptor
     {
         public Delegate Delegate { get; }
 
-        public LambdaActionDescriptor(Delegate @delegate)
+        public LambdaDescriptor(Delegate @delegate)
         {
             Delegate = @delegate;
             Parameters = CreateParameterDescriptors(@delegate.Method.GetParameters()).ToList();

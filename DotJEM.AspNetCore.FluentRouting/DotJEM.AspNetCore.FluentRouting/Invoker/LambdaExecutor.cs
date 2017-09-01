@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
-using DotJEM.AspNetCore.FluentRouter.Invoker.MSInternal;
-using DotJEM.AspNetCore.FluentRouter.Routing;
-using Microsoft.AspNetCore.Mvc;
+using DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal;
+using DotJEM.AspNetCore.FluentRouting.Routing;
 
-namespace DotJEM.AspNetCore.FluentRouter.Invoker
+namespace DotJEM.AspNetCore.FluentRouting.Invoker
 {
     public delegate void VoidActionExecutorDelegate(Delegate target, object[] parameters);
     public delegate object ActionExecutorDelegate(Delegate target, object[] parameters);
@@ -229,7 +227,7 @@ namespace DotJEM.AspNetCore.FluentRouter.Invoker
         public bool IsMethodAsync { get; }
         public Type AsyncResultType { get; set; }
 
-        public LambdaExecutor(LambdaActionDescriptor descriptor, ActionExecutorDelegate executorDelegate)
+        public LambdaExecutor(LambdaDescriptor descriptor, ActionExecutorDelegate executorDelegate)
         {
             this.executorDelegate = executorDelegate;
 
@@ -244,7 +242,7 @@ namespace DotJEM.AspNetCore.FluentRouter.Invoker
         }
 
         public LambdaExecutor(
-            LambdaActionDescriptor descriptor,
+            LambdaDescriptor descriptor,
             ActionExecutorDelegate executorDelegate, 
             AsyncActionExecutorDelegate asyncExecutorDelegate, Type asyncResultType)
         {

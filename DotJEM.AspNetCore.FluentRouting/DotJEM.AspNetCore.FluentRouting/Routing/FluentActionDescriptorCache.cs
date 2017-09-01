@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using DotJEM.AspNetCore.FluentRouting.Builders;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 
-namespace DotJEM.AspNetCore.FluentRouter.Routing
+namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
     public class FluentActionDescriptorCache : IFluentActionDescriptorCache
     {
@@ -19,7 +20,7 @@ namespace DotJEM.AspNetCore.FluentRouter.Routing
             return factory.CreateDescriptors(route);
         }
 
-        public IEnumerable<ActionDescriptor> Lookup(ActionRoute route)
+        public IEnumerable<ActionDescriptor> Lookup(LambdaRoute route)
         {
             if(route == null) return new ActionDescriptor[0];
             //TODO : CACHE

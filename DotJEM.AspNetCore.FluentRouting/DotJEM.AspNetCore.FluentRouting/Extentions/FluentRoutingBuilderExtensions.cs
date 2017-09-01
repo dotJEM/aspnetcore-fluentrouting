@@ -1,7 +1,6 @@
 ﻿using System;
-using DotJEM.AspNetCore.FluentRouter;
-using DotJEM.AspNetCore.FluentRouter.Builders;
-using DotJEM.AspNetCore.FluentRouter.Routing;
+using DotJEM.AspNetCore.FluentRouting.Builders;
+using DotJEM.AspNetCore.FluentRouting.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace

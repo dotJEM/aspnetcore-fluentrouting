@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotJEM.AspNetCore.FluentRouter.Invoker.MSInternal
+namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
 {
     //NOTE: All this is more or less taken directly from https://github.com/aspnet/Common and same licence should be applied to these particular files.
     //      Reason for copy is that they where internal

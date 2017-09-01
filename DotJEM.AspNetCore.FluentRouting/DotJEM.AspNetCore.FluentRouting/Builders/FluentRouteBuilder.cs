@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotJEM.AspNetCore.FluentRouter.Builders
+namespace DotJEM.AspNetCore.FluentRouting.Builders
 {
     // https://github.com/aspnet/Home
     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing
@@ -46,7 +46,7 @@ namespace DotJEM.AspNetCore.FluentRouter.Builders
         public IFluentRouteBuilder AddDelegateRoute(Delegate handler, string name, string template, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens)
         {
             IInlineConstraintResolver resolver = app.ApplicationServices.GetRequiredService<IInlineConstraintResolver>();
-            routes.Add(new ActionRoute(handler, this.handler, name, template, defaults, constraints, dataTokens, resolver));
+            routes.Add(new LambdaRoute(handler, this.handler, name, template, defaults, constraints, dataTokens, resolver));
             return this;
         }
 

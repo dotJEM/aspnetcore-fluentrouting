@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace DotJEM.AspNetCore.FluentRouter.Routing
+namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
     public class FluentRouteHandler : IRouter
     {
@@ -63,8 +63,7 @@ namespace DotJEM.AspNetCore.FluentRouter.Routing
 
             context.Handler = c =>
             {
-                FluentActionContext actionContext = new FluentActionContext(context.HttpContext, c.GetRouteData(), actionDescriptor);
-                //ActionContext actionContext = new ActionContext(context.HttpContext, c.GetRouteData(), actionDescriptor);
+                ActionContext actionContext = new ActionContext(context.HttpContext, c.GetRouteData(), actionDescriptor);
                 if (actionContextAccessor != null)
                     actionContextAccessor.ActionContext = actionContext;
                 IActionInvoker invoker = actionInvokerFactory.CreateInvoker(actionContext);

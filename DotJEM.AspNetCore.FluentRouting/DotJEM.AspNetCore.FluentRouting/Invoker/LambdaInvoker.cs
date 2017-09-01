@@ -5,23 +5,20 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using DotJEM.AspNetCore.FluentRouter.Invoker;
-using DotJEM.AspNetCore.FluentRouter.Invoker.MSInternal;
-using DotJEM.AspNetCore.FluentRouter.Routing;
+using DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal;
+using DotJEM.AspNetCore.FluentRouting.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotJEM.AspNetCore.FluentRouter
+namespace DotJEM.AspNetCore.FluentRouting.Invoker
 {
-    public class FluentActionInvokerCache
+    public class LambdaInvokerCache
     {
         private readonly ParameterBinder parameterBinder;
         private readonly IModelBinderFactory modelBinderFactory;
@@ -29,7 +26,7 @@ namespace DotJEM.AspNetCore.FluentRouter
         private readonly IFilterProvider[] filterProviders;
         private readonly ILambdaExecutorDelegateFactory delegateFactory = new LambdaExecutorDelegateFactory();
 
-        public FluentActionInvokerCache(
+        public LambdaInvokerCache(
             ParameterBinder parameterBinder, 
             IModelBinderFactory modelBinderFactory,
             IModelMetadataProvider modelMetadataProvider,
@@ -41,56 +38,62 @@ namespace DotJEM.AspNetCore.FluentRouter
             this.filterProviders = filterProviders.OrderBy(item => item.Order).ToArray();
         }
 
-        public (FluentActionInvokerCacheEntry, IFilterMetadata[]) Lookup(FluentActionContext context)
+        public (LambdaInvokerCacheEntry, IFilterMetadata[]) Lookup(LambdaActionContext context)
         {
             //TODO: Cache
 
-            LambdaActionDescriptor descriptor = context.ActionDescriptor as LambdaActionDescriptor;
+            LambdaDescriptor descriptor = context.ActionDescriptor as LambdaDescriptor;
             if (descriptor == null)
                 return (null, null);
 
-            IFilterMetadata[] filterMetadatas;
             FilterFactoryResult filterFactoryResult = FilterFactory.GetAllFilters(filterProviders, context);
-            filterMetadatas = filterFactoryResult.Filters;
+            IFilterMetadata[] filterMetadatas = filterFactoryResult.Filters;
 
             //NOTE: Does not make sense for Func<T> ??
             //object[] parameterDefaultValues = ParameterDefaultValues.GetParameterDefaultValues(descriptor.Delegate.Method);
-            CoercedAwaitableInfo awaitableInfo;
 
             LambdaExecutor executor;
-            if (CoercedAwaitableInfo.TryGetAwaitableInfo(descriptor.Delegate.Method.ReturnType, out awaitableInfo))
+            if (CoercedAwaitableInfo.TryGetAwaitableInfo(descriptor.Delegate.Method.ReturnType, out var awaitableInfo))
             {
-                executor = new LambdaExecutor(descriptor, delegateFactory.Create(descriptor.Delegate), delegateFactory.CreateAsync(descriptor.Delegate, awaitableInfo), awaitableInfo.AwaitableInfo.ResultType);
+                //TODO: It is not quite clear that these two contstructors make a difference in how the LambdaExecutor operates.
+                //      But instead of folloing the design from AspNetCore we wish to have separate executors for Sync vs Async.
+                //      That is why we accept this for now.
+                executor = new LambdaExecutor(
+                    descriptor, 
+                    delegateFactory.Create(descriptor.Delegate),
+                    delegateFactory.CreateAsync(descriptor.Delegate, awaitableInfo), 
+                    awaitableInfo.AwaitableInfo.ResultType);
             }
             else
             {
-                executor = new LambdaExecutor(descriptor, delegateFactory.Create(descriptor.Delegate));
+                executor = new LambdaExecutor(
+                    descriptor,
+                    delegateFactory.Create(descriptor.Delegate));
             }
 
             //TODO: Func Binder Delegate Provider
-            FunctionBinderDelegate functionBinder = FuncBinderDelegateProvider.CreateBinderDelegate(parameterBinder, modelBinderFactory, modelMetadataProvider, descriptor);
-
-            FluentActionInvokerCacheEntry entry = new FluentActionInvokerCacheEntry(functionBinder, executor, filterFactoryResult.CacheableFilters);
+            LambdaBinderDelegate lambdaBinder = FuncBinderDelegateProvider.CreateBinderDelegate(parameterBinder, modelBinderFactory, modelMetadataProvider, descriptor);
+            LambdaInvokerCacheEntry entry = new LambdaInvokerCacheEntry(lambdaBinder, executor, filterFactoryResult.CacheableFilters);
 
             return (entry, filterMetadatas);
         }
     }
 
-    public class FluentActionInvokerCacheEntry
+    public class LambdaInvokerCacheEntry
     {
-        public FunctionBinderDelegate FunctionBinderDelegate { get; }
+        public LambdaBinderDelegate LambdaBinderDelegate { get; }
         public FilterItem[] CacheableFilters { get; }
         public LambdaExecutor ActionExecutor { get; }
 
-        public FluentActionInvokerCacheEntry(FunctionBinderDelegate functionBinder, LambdaExecutor executor, FilterItem[] cacheableFilters)
+        public LambdaInvokerCacheEntry(LambdaBinderDelegate lambdaBinder, LambdaExecutor executor, FilterItem[] cacheableFilters)
         {
-            FunctionBinderDelegate = functionBinder;
+            LambdaBinderDelegate = lambdaBinder;
             CacheableFilters = cacheableFilters;
             ActionExecutor = executor;
         }
     }
 
-    public class FluentActionInvokerProvider : IActionInvokerProvider
+    public class LambdaInvokerProvider : IActionInvokerProvider
     {
         //private readonly ControllerActionInvokerCache _controllerActionInvokerCache;
         //private readonly int _maxModelValidationErrors;
@@ -99,27 +102,27 @@ namespace DotJEM.AspNetCore.FluentRouter
 
         private readonly ILogger logger;
         private readonly DiagnosticSource diagnosticSource;
-        private readonly FluentActionInvokerCache cache;
+        private readonly LambdaInvokerCache cache;
         private readonly IReadOnlyList<IValueProviderFactory> valueProviderFactories;
 
         public int Order => -1000;
 
-        public FluentActionInvokerProvider(
+        public LambdaInvokerProvider(
             //IControllerFactory controllerFactory, 
             //ControllerActionInvokerCache controllerActionInvokerCache, 
             //IControllerArgumentBinder argumentBinder, 
-            FluentActionInvokerCache cache,
+            LambdaInvokerCache cache,
             IOptions<MvcOptions> optionsAccessor,
             ILoggerFactory loggerFactory,
             DiagnosticSource diagnosticSource)
         {
             //this._controllerActionInvokerCache = controllerActionInvokerCache;
-            this.valueProviderFactories = optionsAccessor.Value.ValueProviderFactories.ToArray();
+            valueProviderFactories = optionsAccessor.Value.ValueProviderFactories.ToArray();
             //this._maxModelValidationErrors = optionsAccessor.Value.MaxModelValidationErrors;
             //this._logger = (ILogger)loggerFactory.CreateLogger<ControllerActionInvoker>();
             //this._diagnosticSource = diagnosticSource;
 
-            this.logger = loggerFactory.CreateLogger<FluentActionInvoker>();
+            logger = loggerFactory.CreateLogger<LambdaInvoker>();
             this.cache = cache;
             this.diagnosticSource = diagnosticSource;
         }
@@ -128,7 +131,7 @@ namespace DotJEM.AspNetCore.FluentRouter
         public void OnProvidersExecuting(ActionInvokerProviderContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (!(context.ActionContext.ActionDescriptor is LambdaActionDescriptor))
+            if (!(context.ActionContext.ActionDescriptor is LambdaDescriptor))
                 return;
 
             //ControllerContext controllerContext = new ControllerContext(context.ActionContext);
@@ -142,12 +145,11 @@ namespace DotJEM.AspNetCore.FluentRouter
             //             cachedResult.Item1, 
             //             cachedResult.Item2);
             //context.Result = (IActionInvoker)controllerActionInvoker;
-            FluentActionContext ctx = context.ActionContext as FluentActionContext;
-            ctx.ValueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories);
+            LambdaActionContext ctx = new LambdaActionContext(context.ActionContext, new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories));
 
-            (FluentActionInvokerCacheEntry entry, IFilterMetadata[] filters) = cache.Lookup(ctx);
+            (LambdaInvokerCacheEntry entry, IFilterMetadata[] filters) = cache.Lookup(ctx);
 
-            context.Result = new FluentActionInvoker(logger, diagnosticSource, ctx, entry, filters);
+            context.Result = new LambdaInvoker(logger, diagnosticSource, ctx, entry, filters);
         }
 
 
@@ -157,29 +159,26 @@ namespace DotJEM.AspNetCore.FluentRouter
         }
     }
 
-    public class FluentActionContext : ActionContext
+    public class LambdaActionContext : ActionContext
     {
+        public IList<IValueProviderFactory> ValueProviderFactories { get; set; }
 
-
-
-
-        public FluentActionContext(HttpContext context, RouteData data, ActionDescriptor descriptor)
-            : base(context, data, descriptor)
+        public LambdaActionContext(ActionContext context, IList<IValueProviderFactory> valueFactories)
+            : base(context)
         {
+            ValueProviderFactories = valueFactories;
         }
 
-        public IList<IValueProviderFactory> ValueProviderFactories { get; set; }
     }
 
-    public class FluentActionInvoker : ResourceInvoker, IActionInvoker
+    public class LambdaInvoker : ResourceInvoker, IActionInvoker
     {
         //TODO:private readonly ControllerActionInvokerCacheEntry _cacheEntry;
-        private readonly FluentActionContext context;
+        private readonly LambdaActionContext context;
 
-        private readonly FluentActionInvokerCacheEntry cacheEntry;
+        private readonly LambdaInvokerCacheEntry cacheEntry;
 
         private Dictionary<string, object> arguments;
-
         private ActionExecutingContext actionExecutingContext;
         private ActionExecutedContext actionExecutedContext;
         /*
@@ -193,9 +192,9 @@ namespace DotJEM.AspNetCore.FluentRouter
          * IReadOnlyList<IValueProviderFactory> valueProviderFactories, 
          * int maxModelValidationErrors)
         */
-        internal FluentActionInvoker(//IServiceProvider serviceProvider,
+        internal LambdaInvoker(//IServiceProvider serviceProvider,
             //TODO:ControllerActionInvokerCacheEntry cacheEntry,
-            ILogger logger, DiagnosticSource diagnosticSource, FluentActionContext context, FluentActionInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
+            ILogger logger, DiagnosticSource diagnosticSource, LambdaActionContext context, LambdaInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
             : base(diagnosticSource, logger, context, filters, context.ValueProviderFactories)
         {
             this.context = context;
@@ -213,12 +212,9 @@ namespace DotJEM.AspNetCore.FluentRouter
             {
                 case State.ActionBegin:
                 {
-                    //var controllerContext = _controllerContext;
-
                     _cursor.Reset();
-
-                    //TODO: _instance = _cacheEntry.ControllerFactory(controllerContext);
-
+                    // TODO: instance is not a Controller in our case, instead it's a Delegate.
+                    // _instance = _cacheEntry.ControllerFactory(controllerContext);
                     arguments = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                     Task task = BindArgumentsAsync();
@@ -260,10 +256,9 @@ namespace DotJEM.AspNetCore.FluentRouter
                 case State.ActionAsyncBegin:
                 {
                     Debug.Assert(state != null);
-                    Debug.Assert(this.actionExecutingContext != null);
+                    Debug.Assert(actionExecutingContext != null);
 
                     IAsyncActionFilter filter = (IAsyncActionFilter)state;
-
                     _diagnosticSource.BeforeOnActionExecution(actionExecutingContext, filter);
 
                     Task task = filter.OnActionExecutionAsync(actionExecutingContext, InvokeNextActionFilterAwaitedAsync);
@@ -286,7 +281,7 @@ namespace DotJEM.AspNetCore.FluentRouter
                     if (actionExecutedContext == null)
                     {
                         // If we get here then the filter didn't call 'next' indicating a short circuit.
-                        //TODO:_logger.ActionFilterShortCircuited(filter);
+                        _logger.LogDebug(-1, "_logger.ActionFilterShortCircuited(filter);");
 
                         actionExecutedContext = new ActionExecutedContext(context,_filters,_instance)
                         {
@@ -303,29 +298,23 @@ namespace DotJEM.AspNetCore.FluentRouter
                 case State.ActionSyncBegin:
                 {
                     Debug.Assert(state != null);
-                    Debug.Assert(this.actionExecutingContext != null);
+                    Debug.Assert(actionExecutingContext != null);
 
                     IActionFilter filter = (IActionFilter)state;
-                    ActionExecutingContext actionExecutingContext = this.actionExecutingContext;
 
                     _diagnosticSource.BeforeOnActionExecuting(actionExecutingContext, filter);
-
                     filter.OnActionExecuting(actionExecutingContext);
-
                     _diagnosticSource.AfterOnActionExecuting(actionExecutingContext, filter);
 
                     if (actionExecutingContext.Result != null)
                     {
                         // Short-circuited by setting a result.
-                        //TODO:_logger.ActionFilterShortCircuited(filter);
+                        _logger.LogDebug("_logger.ActionFilterShortCircuited(filter);");
 
-                        actionExecutedContext = new ActionExecutedContext(
-                            this.actionExecutingContext,
-                            _filters,
-                            _instance)
+                        actionExecutedContext = new ActionExecutedContext(actionExecutingContext, _filters, _instance)
                         {
                             Canceled = true,
-                            Result = this.actionExecutingContext.Result,
+                            Result = actionExecutingContext.Result,
                         };
 
                         goto case State.ActionEnd;
@@ -345,7 +334,7 @@ namespace DotJEM.AspNetCore.FluentRouter
                 {
                     Debug.Assert(state != null);
                     Debug.Assert(actionExecutingContext != null);
-                    Debug.Assert(this.actionExecutedContext != null);
+                    Debug.Assert(actionExecutedContext != null);
 
                     IActionFilter filter = (IActionFilter)state;
 
@@ -374,9 +363,9 @@ namespace DotJEM.AspNetCore.FluentRouter
                 {
                     if (scope == Scope.Action)
                     {
-                        if (this.actionExecutedContext == null)
+                        if (actionExecutedContext == null)
                         {
-                            this.actionExecutedContext = new ActionExecutedContext(context, _filters, _instance)
+                            actionExecutedContext = new ActionExecutedContext(context, _filters, _instance)
                             {
                                 Result = _result,
                             };
@@ -432,13 +421,11 @@ namespace DotJEM.AspNetCore.FluentRouter
             if (actionExecutingContext.Result != null)
             {
                 // If we get here, it means that an async filter set a result AND called next(). This is forbidden.
-                string message = "Resources.FormatAsyncActionFilter_InvalidShortCircuit("; //TODO
-                //typeof(IAsyncActionFilter).Name,
-                //nameof(ActionExecutingContext.Result),
-                //typeof(ActionExecutingContext).Name,
-                //typeof(ActionExecutionDelegate).Name);
-
-                throw new InvalidOperationException(message);
+                throw new InvalidOperationException("Resources.FormatAsyncActionFilter_InvalidShortCircuit(" +
+                                                    "typeof(IAsyncActionFilter).Name, " +
+                                                    "nameof(ActionExecutingContext.Result), " +
+                                                    "typeof(ActionExecutingContext).Name, " +
+                                                    "typeof(ActionExecutionDelegate).Name);");
             }
 
             await InvokeNextActionFilterAsync();
@@ -449,7 +436,7 @@ namespace DotJEM.AspNetCore.FluentRouter
 
         private async Task InvokeActionMethodAsync()
         {
-            LambdaActionDescriptor fac = context.ActionDescriptor as LambdaActionDescriptor;
+            LambdaDescriptor fac = context.ActionDescriptor as LambdaDescriptor;
             if (fac == null)
                 throw new InvalidOperationException();
 
@@ -587,59 +574,28 @@ namespace DotJEM.AspNetCore.FluentRouter
             {
                 return Task.CompletedTask;
             }
-            return cacheEntry.FunctionBinderDelegate(context, arguments);
+            return cacheEntry.LambdaBinderDelegate(context, arguments);
         }
 
         private object[] PrepareArguments(IDictionary<string, object> actionParameters, LambdaExecutor executor)
         {
-            ParameterInfo[] parameters = executor.Parameters; //TODO: actionMethodExecutor.MethodParameters;
+            ParameterInfo[] parameters = executor.Parameters;
             int count = parameters.Length;
             if (count == 0)
                 return null;
                         
-            IServiceProvider services = context.HttpContext.RequestServices;
+            //IServiceProvider services = context.HttpContext.RequestServices;
             object[] arguments = new object[count];
             for (int i = 0; i < count; i++)
             {
                 ParameterInfo parameterInfo = parameters[i];
                 if (!actionParameters.TryGetValue(parameterInfo.Name, out object value))
                 {
+                    //TODO: Special case, but we should mobe this to the binder delegate!
                     if (parameterInfo.ParameterType == typeof(HttpContext))
                         value = context.HttpContext;
                 }
-
                 arguments[i] = value;
-
-                if (parameterInfo.ParameterType.IsGenericType)
-                {
-                    Type gt = parameterInfo.ParameterType.GetGenericTypeDefinition();
-                    if (gt == typeof(FromHeader<>))
-                    {
-                    }
-                    if (gt == typeof(FromServices<>))
-                    {
-                    }
-                    if (gt == typeof(FromRoute<>))
-                    {
-                        //TODO: This won't work for more complex types, we need a way to say that 
-                        //      AspNetCore should run all it's useual fomartters/binders and then just finally
-                        //      wrap that up into a FromRoute<T> value.
-                        //arguments[i] = Activator.CreateInstance(parameterInfo.ParameterType, value);
-                    }
-                    if (gt == typeof(FromQuery<>))
-                    {
-                    }
-                    if (gt == typeof(FromForm<>))
-                    {
-                    }
-                    if (gt == typeof(FromBody<>))
-                    {
-                    }
-                    if (gt == typeof(FromUri<>))
-                    {
-                    }
-                }
-
             }
 
             return arguments;

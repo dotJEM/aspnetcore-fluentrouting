@@ -1,23 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DotJEM.AspNetCore.FluentRouter.Routing;
+using DotJEM.AspNetCore.FluentRouting.Invoker;
+using DotJEM.AspNetCore.FluentRouting.Routing;
 using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace DotJEM.AspNetCore.FluentRouter
+namespace DotJEM.AspNetCore.FluentRouting
 {
-    public delegate Task FunctionBinderDelegate(FluentActionContext context, Dictionary<string, object> arguments);
+    public delegate Task LambdaBinderDelegate(LambdaActionContext context, Dictionary<string, object> arguments);
 
     public class FuncBinderDelegateProvider
     {
         //TODO: Service.
-        public static FunctionBinderDelegate CreateBinderDelegate(
+        public static LambdaBinderDelegate CreateBinderDelegate(
             ParameterBinder parameterBinder, 
             IModelBinderFactory modelBinderFactory, 
             IModelMetadataProvider modelMetadataProvider, 
-            LambdaActionDescriptor descriptor)
+            LambdaDescriptor descriptor)
         {
             if (parameterBinder == null) throw new ArgumentNullException(nameof(parameterBinder));
             if (modelMetadataProvider == null) throw new ArgumentNullException(nameof(modelMetadataProvider));
@@ -29,7 +29,7 @@ namespace DotJEM.AspNetCore.FluentRouter
 
             return Bind;
 
-            async Task Bind(FluentActionContext context, Dictionary<string, object> arguments)
+            async Task Bind(LambdaActionContext context, Dictionary<string, object> arguments)
             {
                 CompositeValueProvider valueProvider = await CompositeValueProvider.CreateAsync(context, context.ValueProviderFactories);
                 IList<ParameterDescriptor> parameters = descriptor.Parameters;
@@ -48,7 +48,7 @@ namespace DotJEM.AspNetCore.FluentRouter
             }
         }
 
-        private static BindingInfo[] GetParameterBindingInfo(IModelBinderFactory modelBinderFactory, IModelMetadataProvider modelMetadataProvider, LambdaActionDescriptor descriptor)
+        private static BindingInfo[] GetParameterBindingInfo(IModelBinderFactory modelBinderFactory, IModelMetadataProvider modelMetadataProvider, LambdaDescriptor descriptor)
         {
             IList<ParameterDescriptor> parameters = descriptor.Parameters;
             if (parameters.Count == 0)

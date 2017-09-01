@@ -1,14 +1,13 @@
 using System;
-using DotJEM.AspNetCore.FluentRouter.Invoker;
-using DotJEM.AspNetCore.FluentRouter.Routing;
 using DotJEM.AspNetCore.FluentRouting.Invoker;
+using DotJEM.AspNetCore.FluentRouting.Routing;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace DotJEM.AspNetCore.FluentRouter.Extentions
+namespace DotJEM.AspNetCore.FluentRouting.Extentions
 {
     /// <summary>
     /// Contains extension methods to <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
@@ -25,15 +24,15 @@ namespace DotJEM.AspNetCore.FluentRouter.Extentions
             services.TryAddSingleton<IActionSelector, FluentActionSelector>();
 
             services.AddMvcCore();
-            services.TryAddSingleton<FluentActionInvokerCache>();
+            services.TryAddSingleton<LambdaInvokerCache>();
             services.TryAddSingleton<FluentRouteHandler>();
 
             services.TryAddSingleton<IFluentActionDescriptorFactory, FluentActionDescriptorFactory>();
             services.TryAddSingleton<IFluentActionDescriptorCache, FluentActionDescriptorCache>();
             services.TryAddSingleton<ILambdaExecutorDelegateFactory, LambdaExecutorDelegateFactory>();
 
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IActionInvokerProvider, FluentActionInvokerProvider>());
-            //FluentActionInvokerProvider: IActionInvokerProvider
+            services.TryAddEnumerable(ServiceDescriptor.Transient<IActionInvokerProvider, LambdaInvokerProvider>());
+            //LambdaInvokerProvider: IActionInvokerProvider
             //services.TryAddTransient<IInlineConstraintResolver, DefaultInlineConstraintResolver>();
             //services.TryAddSingleton<UrlEncoder>(UrlEncoder.Default);
             //services.TryAddSingleton<Microsoft.Extensions.ObjectPool.ObjectPool<UriBuildingContext>>((Func<IServiceProvider, Microsoft.Extensions.ObjectPool.ObjectPool<UriBuildingContext>>)(s => s.GetRequiredService<ObjectPoolProvider>().Create<UriBuildingContext>((IPooledObjectPolicy<UriBuildingContext>)new UriBuilderContextPooledObjectPolicy(s.GetRequiredService<UrlEncoder>()))));

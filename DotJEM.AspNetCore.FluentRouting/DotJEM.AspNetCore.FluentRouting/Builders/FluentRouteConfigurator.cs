@@ -1,9 +1,8 @@
 using System;
-using DotJEM.AspNetCore.FluentRouter.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace DotJEM.AspNetCore.FluentRouter
+namespace DotJEM.AspNetCore.FluentRouting.Builders
 {
     public class FluentRouteConfigurator : IFluentRouteConfigurator
     {

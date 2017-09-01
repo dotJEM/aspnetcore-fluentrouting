@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DotJEM.AspNetCore.FluentRouting.Builders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.Options;
 
-namespace DotJEM.AspNetCore.FluentRouter.Routing
+namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
     public class FluentActionDescriptorFactory : IFluentActionDescriptorFactory
     {
@@ -28,9 +29,9 @@ namespace DotJEM.AspNetCore.FluentRouter.Routing
             return ControllerActionDescriptorBuilder.Build(applicationModel);
         }
 
-        public IEnumerable<ActionDescriptor> CreateDescriptors(ActionRoute route)
+        public IEnumerable<ActionDescriptor> CreateDescriptors(LambdaRoute route)
         {
-            return new []{ new LambdaActionDescriptor(route.Delegate) };
+            return new []{ new LambdaDescriptor(route.Delegate) };
         }
 
         protected internal ApplicationModel BuildModel(TypeInfo controllerType)

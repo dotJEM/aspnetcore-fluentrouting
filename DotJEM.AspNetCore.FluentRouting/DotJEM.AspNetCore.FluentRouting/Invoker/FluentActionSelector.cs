@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DotJEM.AspNetCore.FluentRouter;
-using DotJEM.AspNetCore.FluentRouter.Routing;
+using DotJEM.AspNetCore.FluentRouting.Builders;
+using DotJEM.AspNetCore.FluentRouting.Routing;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -31,7 +31,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
             foreach (IRouter router in context.RouteData.Routers)
             {
                 candidates.AddRange(cache.Lookup(router as ControllerRoute));
-                candidates.AddRange(cache.Lookup(router as ActionRoute));
+                candidates.AddRange(cache.Lookup(router as LambdaRoute));
             }
             return candidates;
         }
