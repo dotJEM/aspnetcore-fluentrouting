@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Routing;
 
 namespace DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects
 {
-    public class LambdaRoute : Route
+    public class LambdaRoute : Route, IIdableRoute
     {
+        public Guid Id { get; } = Guid.NewGuid();
+
         public Delegate Delegate { get; }
 
         public LambdaRoute(Delegate @delegate, IRouter target, string routeName, string routeTemplate, RouteValueDictionary defaults, IDictionary<string, object> constraints, RouteValueDictionary dataTokens, IInlineConstraintResolver inlineConstraintResolver)

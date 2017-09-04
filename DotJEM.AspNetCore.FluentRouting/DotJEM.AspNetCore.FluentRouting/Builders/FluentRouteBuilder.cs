@@ -12,8 +12,20 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
     // https://github.com/ivaylokenov/AspNet.Mvc.TypedRouting
     // https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/routing
 
-    //TODO: Perhaps switch to MvC and inherit the MvcHandler, or we need to add things deeper.
+    public interface IFluentRouteBuilder
+    {
+        IFluentRouteConfigurator Route(string template);
 
+        //IFluentRouteConfigurator Route(string verb, string template);
+        //IFluentRouteConfigurator RouteConnect(string template);
+        //IFluentRouteConfigurator RouteDelete(string template);
+        //IFluentRouteConfigurator RouteGet(string template);
+        //IFluentRouteConfigurator RouteHead(string template);
+        //IFluentRouteConfigurator RouteOptions(string template);
+        //IFluentRouteConfigurator RoutePatch(string template);
+        //IFluentRouteConfigurator RoutePut(string template);
+        //IFluentRouteConfigurator RouteTrace(string template);
+    }
 
     public class FluentRouteBuilder : IFluentRouteBuilder
     {
@@ -44,10 +56,10 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
             routes.Add(new ControllerRoute(controllerType, handler, name, template, defaults, constraints, dataTokens, resolver));
             return this;
         }
-        public IFluentRouteBuilder AddDelegateRoute(Delegate handler, string name, string template, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens)
+        public IFluentRouteBuilder AddDelegateRoute(Delegate lambda, string name, string template, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens)
         {
             IInlineConstraintResolver resolver = app.ApplicationServices.GetRequiredService<IInlineConstraintResolver>();
-            routes.Add(new LambdaRoute(handler, this.handler, name, template, defaults, constraints, dataTokens, resolver));
+            routes.Add(new LambdaRoute(lambda, handler, name, template, defaults, constraints, dataTokens, resolver));
             return this;
         }
 
@@ -57,35 +69,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
             routes.ForEach(routeCollection.Add);
             return routeCollection;
         }
-
-        //public RouteBuilder(IApplicationBuilder applicationBuilder, IRouter defaultHandler)
-        //{
-        //    if (applicationBuilder == null)
-        //        throw new ArgumentNullException("applicationBuilder");
-        //    if (applicationBuilder.ApplicationServices.GetService(typeof(RoutingMarkerService)) == null)
-        //        throw new InvalidOperationException(Resources.FormatUnableToFindServices((object)"IServiceCollection", (object)"AddRouting", (object)"ConfigureServices(...)"));
-        //    this.ApplicationBuilder = applicationBuilder;
-        //    this.DefaultHandler = defaultHandler;
-        //    this.ServiceProvider = applicationBuilder.ApplicationServices;
-        //    this.Routes = (IList<IRouter>)new List<IRouter>();
-        //}
-
-        //public IRouter Build()
-        //{
-        //    RouteCollection routeCollection = new RouteCollection();
-        //    foreach (IRouter route in (IEnumerable<IRouter>)this.Routes)
-        //        routeCollection.Add(route);
-        //    return (IRouter)routeCollection;
-        //}
     }
 
-    //public static IRouteBuilder MapRoute(this IRouteBuilder routeBuilder, string name, string template, object defaults, object constraints, object dataTokens)
-    //{
-    //    if (routeBuilder.DefaultHandler == null)
-    //    throw new RouteCreationException(Resources.FormatDefaultHandler_MustBeSet((object)"IRouteBuilder"));
-    //    IInlineConstraintResolver requiredService = routeBuilder.ServiceProvider.GetRequiredService<IInlineConstraintResolver>();
-    //    routeBuilder.Routes.Add((IRouter)new Route(routeBuilder.DefaultHandler, name, template, new RouteValueDictionary(defaults), (IDictionary<string, object>)new RouteValueDictionary(constraints), new RouteValueDictionary(dataTokens), requiredService));
-    //    return routeBuilder;
-    //}
 }
 

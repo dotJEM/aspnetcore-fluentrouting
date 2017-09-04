@@ -1,31 +1,33 @@
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using DotJEM.AspNetCore.FluentRouting.Builders;
 using DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Routing;
 
 namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
     public class FluentActionDescriptorCache : IFluentActionDescriptorCache
     {
+        private static readonly ActionDescriptor[] EMPTY_RESULT = new ActionDescriptor[0];
+
         private readonly IFluentActionDescriptorFactory factory;
+        private readonly ConcurrentDictionary<Guid, IList<ActionDescriptor>> cache = new ConcurrentDictionary<Guid, IList<ActionDescriptor>>();
 
         public FluentActionDescriptorCache(IFluentActionDescriptorFactory factory)
         {
             this.factory = factory;
         }
 
-        public IEnumerable<ActionDescriptor> Lookup(ControllerRoute route)
+        public IEnumerable<ActionDescriptor> Lookup(ControllerRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
+        public IEnumerable<ActionDescriptor> Lookup(LambdaRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
+        private IEnumerable<ActionDescriptor> GetOrAdd(IIdableRoute route, Func<IEnumerable<ActionDescriptor>> factory)
         {
-            if(route == null) return new ActionDescriptor[0];
-            //TODO : CACHE
-            return factory.CreateDescriptors(route);
-        }
+            if(route == null) return EMPTY_RESULT;
 
-        public IEnumerable<ActionDescriptor> Lookup(LambdaRoute route)
-        {
-            if(route == null) return new ActionDescriptor[0];
-            //TODO : CACHE
-            return factory.CreateDescriptors(route);
+            return cache.GetOrAdd(route.Id, s => factory().ToList());
         }
     }
 }

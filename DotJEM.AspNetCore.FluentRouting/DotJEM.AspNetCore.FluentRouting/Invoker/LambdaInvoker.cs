@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,6 +27,9 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
         private readonly IFilterProvider[] filterProviders;
         private readonly ILambdaExecutorDelegateFactory delegateFactory = new LambdaExecutorDelegateFactory();
 
+        private readonly ConcurrentDictionary<ActionDescriptor, LambdaInvokerCacheEntry> cache =
+            new ConcurrentDictionary<ActionDescriptor, LambdaInvokerCacheEntry>();
+
         public LambdaInvokerCache(
             ParameterBinder parameterBinder, 
             IModelBinderFactory modelBinderFactory,
@@ -40,42 +44,44 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
 
         public (LambdaInvokerCacheEntry, IFilterMetadata[]) Lookup(LambdaActionContext context)
         {
-            //TODO: Cache
-
             LambdaDescriptor descriptor = context.ActionDescriptor as LambdaDescriptor;
             if (descriptor == null)
                 return (null, null);
 
-            FilterFactoryResult filterFactoryResult = FilterFactory.GetAllFilters(filterProviders, context);
-            IFilterMetadata[] filterMetadatas = filterFactoryResult.Filters;
-
-            //NOTE: Does not make sense for Func<T> ??
-            //object[] parameterDefaultValues = ParameterDefaultValues.GetParameterDefaultValues(descriptor.Delegate.Method);
-
-            LambdaExecutor executor;
-            if (CoercedAwaitableInfo.TryGetAwaitableInfo(descriptor.Delegate.Method.ReturnType, out var awaitableInfo))
+            if (!cache.TryGetValue(descriptor, out LambdaInvokerCacheEntry entry))
             {
-                //TODO: It is not quite clear that these two contstructors make a difference in how the LambdaExecutor operates.
-                //      But instead of folloing the design from AspNetCore we wish to have separate executors for Sync vs Async.
-                //      That is why we accept this for now.
-                executor = new LambdaExecutor(
-                    descriptor, 
-                    delegateFactory.Create(descriptor.Delegate),
-                    delegateFactory.CreateAsync(descriptor.Delegate, awaitableInfo), 
-                    awaitableInfo.AwaitableInfo.ResultType);
-            }
-            else
-            {
-                executor = new LambdaExecutor(
-                    descriptor,
-                    delegateFactory.Create(descriptor.Delegate));
-            }
+                FilterFactoryResult filterFactoryResult = FilterFactory.GetAllFilters(filterProviders, context);
+                IFilterMetadata[] filterMetadatas = filterFactoryResult.Filters;
 
-            //TODO: Func Binder Delegate Provider
-            LambdaBinderDelegate lambdaBinder = FuncBinderDelegateProvider.CreateBinderDelegate(parameterBinder, modelBinderFactory, modelMetadataProvider, descriptor);
-            LambdaInvokerCacheEntry entry = new LambdaInvokerCacheEntry(lambdaBinder, executor, filterFactoryResult.CacheableFilters);
+                //NOTE: How do we provide Default parameters for Func parameters?...
+                //object[] parameterDefaultValues = ParameterDefaultValues.GetParameterDefaultValues(descriptor.Delegate.Method);
 
-            return (entry, filterMetadatas);
+                LambdaExecutor executor;
+                if (CoercedAwaitableInfo.TryGetAwaitableInfo(descriptor.Delegate.Method.ReturnType,
+                    out var awaitableInfo))
+                {
+                    //TODO: It is not quite clear that these two contstructors make a difference in how the LambdaExecutor operates.
+                    //      But instead of folloing the design from AspNetCore we wish to have separate executors for Sync vs Async.
+                    //      That is why we accept this for now.
+                    executor = new LambdaExecutor(
+                        descriptor,
+                        delegateFactory.Create(descriptor.Delegate),
+                        delegateFactory.CreateAsync(descriptor.Delegate, awaitableInfo),
+                        awaitableInfo.AwaitableInfo.ResultType);
+                }
+                else
+                {
+                    executor = new LambdaExecutor(
+                        descriptor,
+                        delegateFactory.Create(descriptor.Delegate));
+                }
+
+                //TODO: Injectable service instead of static implementation.
+                LambdaBinderDelegate lambdaBinder = LambdaBinderDelegateProvider
+                    .CreateBinderDelegate(parameterBinder, modelBinderFactory, modelMetadataProvider, descriptor);
+                return (cache.GetOrAdd(descriptor, new LambdaInvokerCacheEntry(lambdaBinder, executor, filterFactoryResult.CacheableFilters)), filterMetadatas);
+            }
+            return (entry, FilterFactory.CreateUncachedFilters(filterProviders, context, entry.CacheableFilters));
         }
     }
 

@@ -11,7 +11,7 @@ namespace DotJEM.AspNetCore.FluentRouting
 {
     public delegate Task LambdaBinderDelegate(LambdaActionContext context, Dictionary<string, object> arguments);
 
-    public class FuncBinderDelegateProvider
+    public class LambdaBinderDelegateProvider
     {
         //TODO: Service.
         public static LambdaBinderDelegate CreateBinderDelegate(

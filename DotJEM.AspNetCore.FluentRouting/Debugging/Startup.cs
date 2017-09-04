@@ -53,6 +53,9 @@ namespace Debugging
                     entity["take"] = take.Value;
                     return entity;
                 });
+
+
+                //router.Load<MyModule>();
             });
         }
     }
