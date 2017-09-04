@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotJEM.AspNetCore.FluentRouting.Invoker;
 using DotJEM.AspNetCore.FluentRouting.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -37,6 +38,13 @@ namespace DotJEM.AspNetCore.FluentRouting
                 for (int i = 0; i < parameters.Count; i++)
                 {
                     ParameterDescriptor parameter = parameters[i];
+                    //TODO: Special case, perhaps a special binder would be more suited here?
+                    if (parameter.ParameterType == typeof(HttpContext))
+                    {
+                        arguments[parameter.Name] = context.HttpContext;
+                        continue;
+                    }
+
                     BindingInfo binding = parameterBindingInfo[i];
 
                     ModelBindingResult result = await parameterBinder
@@ -58,6 +66,12 @@ namespace DotJEM.AspNetCore.FluentRouting
             for (int i = 0; i < parameters.Count; i++)
             {
                 ParameterDescriptor parameter = parameters[i];
+                //TODO: Special case, perhaps a special binder would be more suited here?
+                if (parameter.ParameterType == typeof(HttpContext))
+                {
+                    //Note: If we hit a HttpContext parameter, we don't need meta data etc.
+                    continue;
+                }
                 ModelMetadata metadata = modelMetadataProvider.GetMetadataForType(parameter.ParameterType);
                 IModelBinder binder = modelBinderFactory.CreateBinder(new ModelBinderFactoryContext
                 {

@@ -1,8 +1,12 @@
 using System;
+using System.Threading.Tasks;
 using DotJEM.AspNetCore.FluentRouting.Invoker;
 using DotJEM.AspNetCore.FluentRouting.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,6 +28,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Extentions
             services.TryAddSingleton<IActionSelector, FluentActionSelector>();
 
             services.AddMvcCore();
+
             services.TryAddSingleton<LambdaInvokerCache>();
             services.TryAddSingleton<FluentRouteHandler>();
 
@@ -55,4 +60,5 @@ namespace DotJEM.AspNetCore.FluentRouting.Extentions
             return services;
         }
     }
+
 }

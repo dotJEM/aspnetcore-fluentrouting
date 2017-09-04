@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Routing;
 
-namespace DotJEM.AspNetCore.FluentRouting.Builders
+namespace DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects
 {
     public class LambdaRoute : Route
     {

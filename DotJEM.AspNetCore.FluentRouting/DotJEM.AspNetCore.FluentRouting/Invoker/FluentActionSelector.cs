@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DotJEM.AspNetCore.FluentRouting.Builders;
+using DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects;
 using DotJEM.AspNetCore.FluentRouting.Routing;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;

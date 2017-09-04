@@ -146,7 +146,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
             //             cachedResult.Item2);
             //context.Result = (IActionInvoker)controllerActionInvoker;
             LambdaActionContext ctx = new LambdaActionContext(context.ActionContext, new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories));
-
+            
             (LambdaInvokerCacheEntry entry, IFilterMetadata[] filters) = cache.Lookup(ctx);
 
             context.Result = new LambdaInvoker(logger, diagnosticSource, ctx, entry, filters);

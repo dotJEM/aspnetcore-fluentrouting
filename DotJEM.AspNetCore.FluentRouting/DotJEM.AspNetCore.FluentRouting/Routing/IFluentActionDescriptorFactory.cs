@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DotJEM.AspNetCore.FluentRouting.Builders;
+using DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 
 namespace DotJEM.AspNetCore.FluentRouting.Routing

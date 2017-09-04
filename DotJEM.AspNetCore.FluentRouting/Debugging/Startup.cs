@@ -44,6 +44,7 @@ namespace Debugging
             {
                 router.Route("hello").To(() => JObject.FromObject(new {hello = "World"}));
                 router.Route("api/values/{id?}").To<ValuesController>();
+                router.Route("api/context/{id?}").To(context => "HELLO CONTEXT");
                 router.Route("api/services/{param}").To((FromRoute<string> param, FromQuery<string> take, FromBody<JObject> body, FromServices<IActionSelector> selector)
                     =>
                 {
