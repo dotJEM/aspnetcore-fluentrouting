@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <Folder Include="Routing\Controllers\" />
-    <Folder Include="Routing\Modules\" />
   </ItemGroup>
   
 </Project>
