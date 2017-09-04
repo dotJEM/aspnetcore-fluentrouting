@@ -1,182 +1,21 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal;
+using DotJEM.AspNetCore.FluentRouting.Invoker.Execution;
 using DotJEM.AspNetCore.FluentRouting.Routing;
+using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotJEM.AspNetCore.FluentRouting.Invoker
 {
-    public class LambdaInvokerCache
-    {
-        private readonly ParameterBinder parameterBinder;
-        private readonly IModelBinderFactory modelBinderFactory;
-        private readonly IModelMetadataProvider modelMetadataProvider;
-        private readonly IFilterProvider[] filterProviders;
-        private readonly ILambdaExecutorDelegateFactory delegateFactory = new LambdaExecutorDelegateFactory();
-
-        private readonly ConcurrentDictionary<ActionDescriptor, LambdaInvokerCacheEntry> cache =
-            new ConcurrentDictionary<ActionDescriptor, LambdaInvokerCacheEntry>();
-
-        public LambdaInvokerCache(
-            ParameterBinder parameterBinder, 
-            IModelBinderFactory modelBinderFactory,
-            IModelMetadataProvider modelMetadataProvider,
-            IEnumerable<IFilterProvider> filterProviders)
-        {
-            this.parameterBinder = parameterBinder;
-            this.modelBinderFactory = modelBinderFactory;
-            this.modelMetadataProvider = modelMetadataProvider;
-            this.filterProviders = filterProviders.OrderBy(item => item.Order).ToArray();
-        }
-
-        public (LambdaInvokerCacheEntry, IFilterMetadata[]) Lookup(LambdaActionContext context)
-        {
-            LambdaDescriptor descriptor = context.ActionDescriptor as LambdaDescriptor;
-            if (descriptor == null)
-                return (null, null);
-
-            if (!cache.TryGetValue(descriptor, out LambdaInvokerCacheEntry entry))
-            {
-                FilterFactoryResult filterFactoryResult = FilterFactory.GetAllFilters(filterProviders, context);
-                IFilterMetadata[] filterMetadatas = filterFactoryResult.Filters;
-
-                //NOTE: How do we provide Default parameters for Func parameters?...
-                //object[] parameterDefaultValues = ParameterDefaultValues.GetParameterDefaultValues(descriptor.Delegate.Method);
-
-                LambdaExecutor executor;
-                if (CoercedAwaitableInfo.TryGetAwaitableInfo(descriptor.Delegate.Method.ReturnType,
-                    out var awaitableInfo))
-                {
-                    //TODO: It is not quite clear that these two contstructors make a difference in how the LambdaExecutor operates.
-                    //      But instead of folloing the design from AspNetCore we wish to have separate executors for Sync vs Async.
-                    //      That is why we accept this for now.
-                    executor = new LambdaExecutor(
-                        descriptor,
-                        delegateFactory.Create(descriptor.Delegate),
-                        delegateFactory.CreateAsync(descriptor.Delegate, awaitableInfo),
-                        awaitableInfo.AwaitableInfo.ResultType);
-                }
-                else
-                {
-                    executor = new LambdaExecutor(
-                        descriptor,
-                        delegateFactory.Create(descriptor.Delegate));
-                }
-
-                //TODO: Injectable service instead of static implementation.
-                LambdaBinderDelegate lambdaBinder = LambdaBinderDelegateProvider
-                    .CreateBinderDelegate(parameterBinder, modelBinderFactory, modelMetadataProvider, descriptor);
-                return (cache.GetOrAdd(descriptor, new LambdaInvokerCacheEntry(lambdaBinder, executor, filterFactoryResult.CacheableFilters)), filterMetadatas);
-            }
-            return (entry, FilterFactory.CreateUncachedFilters(filterProviders, context, entry.CacheableFilters));
-        }
-    }
-
-    public class LambdaInvokerCacheEntry
-    {
-        public LambdaBinderDelegate LambdaBinderDelegate { get; }
-        public FilterItem[] CacheableFilters { get; }
-        public LambdaExecutor ActionExecutor { get; }
-
-        public LambdaInvokerCacheEntry(LambdaBinderDelegate lambdaBinder, LambdaExecutor executor, FilterItem[] cacheableFilters)
-        {
-            LambdaBinderDelegate = lambdaBinder;
-            CacheableFilters = cacheableFilters;
-            ActionExecutor = executor;
-        }
-    }
-
-    public class LambdaInvokerProvider : IActionInvokerProvider
-    {
-        //private readonly ControllerActionInvokerCache _controllerActionInvokerCache;
-        //private readonly int _maxModelValidationErrors;
-        //private readonly ILogger _logger;
-        //private readonly DiagnosticSource _diagnosticSource;
-
-        private readonly ILogger logger;
-        private readonly DiagnosticSource diagnosticSource;
-        private readonly LambdaInvokerCache cache;
-        private readonly IReadOnlyList<IValueProviderFactory> valueProviderFactories;
-
-        public int Order => -1000;
-
-        public LambdaInvokerProvider(
-            //IControllerFactory controllerFactory, 
-            //ControllerActionInvokerCache controllerActionInvokerCache, 
-            //IControllerArgumentBinder argumentBinder, 
-            LambdaInvokerCache cache,
-            IOptions<MvcOptions> optionsAccessor,
-            ILoggerFactory loggerFactory,
-            DiagnosticSource diagnosticSource)
-        {
-            //this._controllerActionInvokerCache = controllerActionInvokerCache;
-            valueProviderFactories = optionsAccessor.Value.ValueProviderFactories.ToArray();
-            //this._maxModelValidationErrors = optionsAccessor.Value.MaxModelValidationErrors;
-            //this._logger = (ILogger)loggerFactory.CreateLogger<ControllerActionInvoker>();
-            //this._diagnosticSource = diagnosticSource;
-
-            logger = loggerFactory.CreateLogger<LambdaInvoker>();
-            this.cache = cache;
-            this.diagnosticSource = diagnosticSource;
-        }
-
-        /// <inheritdoc />
-        public void OnProvidersExecuting(ActionInvokerProviderContext context)
-        {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (!(context.ActionContext.ActionDescriptor is LambdaDescriptor))
-                return;
-
-            //ControllerContext controllerContext = new ControllerContext(context.ActionContext);
-            //controllerContext.ValueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(this._valueProviderFactories);
-            //controllerContext.ModelState.MaxAllowedErrors = this._maxModelValidationErrors;
-            //ValueTuple<ControllerActionInvokerCacheEntry, IFilterMetadata[]> cachedResult = this._controllerActionInvokerCache.GetCachedResult(controllerContext);
-            //ControllerActionInvoker controllerActionInvoker = new ControllerActionInvoker(
-            //             this._logger, 
-            //             this._diagnosticSource, 
-            //             controllerContext, 
-            //             cachedResult.Item1, 
-            //             cachedResult.Item2);
-            //context.Result = (IActionInvoker)controllerActionInvoker;
-            LambdaActionContext ctx = new LambdaActionContext(context.ActionContext, new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories));
-            
-            (LambdaInvokerCacheEntry entry, IFilterMetadata[] filters) = cache.Lookup(ctx);
-
-            context.Result = new LambdaInvoker(logger, diagnosticSource, ctx, entry, filters);
-        }
-
-
-        /// <inheritdoc />
-        public void OnProvidersExecuted(ActionInvokerProviderContext context)
-        {
-        }
-    }
-
-    public class LambdaActionContext : ActionContext
-    {
-        public IList<IValueProviderFactory> ValueProviderFactories { get; set; }
-
-        public LambdaActionContext(ActionContext context, IList<IValueProviderFactory> valueFactories)
-            : base(context)
-        {
-            ValueProviderFactories = valueFactories;
-        }
-
-    }
-
     public class LambdaInvoker : ResourceInvoker, IActionInvoker
     {
         //TODO:private readonly ControllerActionInvokerCacheEntry _cacheEntry;
@@ -198,9 +37,9 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
          * IReadOnlyList<IValueProviderFactory> valueProviderFactories, 
          * int maxModelValidationErrors)
         */
-        internal LambdaInvoker(//IServiceProvider serviceProvider,
-            //TODO:ControllerActionInvokerCacheEntry cacheEntry,
-            ILogger logger, DiagnosticSource diagnosticSource, LambdaActionContext context, LambdaInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
+        internal LambdaInvoker(
+            ILogger logger, DiagnosticSource diagnosticSource,
+            LambdaActionContext context, LambdaInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
             : base(diagnosticSource, logger, context, filters, context.ValueProviderFactories)
         {
             this.context = context;
@@ -542,7 +381,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
         
         private static bool IsResultIActionResult(LambdaExecutor executor)
         {
-            Type resultType = /*executor.AsyncResultType ?? */executor.ReturnType;
+            Type resultType = executor.AsyncResultType ?? executor.ReturnType; //TODO: Suspicious
             return typeof(IActionResult).IsAssignableFrom(resultType);
         }
 

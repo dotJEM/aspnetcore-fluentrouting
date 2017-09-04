@@ -4,9 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal;
-using DotJEM.AspNetCore.FluentRouting.Routing;
+using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 
-namespace DotJEM.AspNetCore.FluentRouting.Invoker
+namespace DotJEM.AspNetCore.FluentRouting.Invoker.Execution
 {
     public delegate void VoidActionExecutorDelegate(Delegate target, object[] parameters);
     public delegate object ActionExecutorDelegate(Delegate target, object[] parameters);
@@ -214,52 +214,5 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
             }
             return parameters;
         }
-    }
-
-    public class LambdaExecutor
-    {
-        private readonly Delegate target;
-        private readonly ActionExecutorDelegate executorDelegate;
-        private readonly AsyncActionExecutorDelegate asyncExecutorDelegate;
-
-        public Type ReturnType { get; }
-        public ParameterInfo[] Parameters { get; }
-        public bool IsMethodAsync { get; }
-        public Type AsyncResultType { get; set; }
-
-        public LambdaExecutor(LambdaDescriptor descriptor, ActionExecutorDelegate executorDelegate)
-        {
-            this.executorDelegate = executorDelegate;
-
-            target = descriptor.Delegate;
-
-            Parameters = descriptor.Delegate.Method.GetParameters();
-            ReturnType = descriptor.Delegate.Method.ReturnType;
-
-            //TODO: Awaitable?
-            IsMethodAsync = false;
-            AsyncResultType = null;
-        }
-
-        public LambdaExecutor(
-            LambdaDescriptor descriptor,
-            ActionExecutorDelegate executorDelegate, 
-            AsyncActionExecutorDelegate asyncExecutorDelegate, Type asyncResultType)
-        {
-            this.executorDelegate = executorDelegate;
-            this.asyncExecutorDelegate = asyncExecutorDelegate;
-
-            target = descriptor.Delegate;
-
-            Parameters = descriptor.Delegate.Method.GetParameters();
-            ReturnType = descriptor.Delegate.Method.ReturnType;
-
-            IsMethodAsync = true;
-            AsyncResultType = asyncResultType;
-        }
-
-        public object Execute(object[] arguments) => executorDelegate(target, arguments);
-
-        public LambdaExecutorAwaitable ExecuteAsync(object[] arguments) => asyncExecutorDelegate(target, arguments);
     }
 }

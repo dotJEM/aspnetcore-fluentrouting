@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotJEM.AspNetCore.FluentRouting.Invoker;
 using DotJEM.AspNetCore.FluentRouting.Routing;
+using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

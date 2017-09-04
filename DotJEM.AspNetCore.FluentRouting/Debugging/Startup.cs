@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Debugging.Controllers;
 using DotJEM.AspNetCore.FluentRouting.Extentions;
 using DotJEM.AspNetCore.FluentRouting.Routing;
+using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Infrastructure;

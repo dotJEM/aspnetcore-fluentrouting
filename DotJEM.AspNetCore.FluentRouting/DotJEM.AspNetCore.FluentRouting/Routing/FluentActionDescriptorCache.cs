@@ -9,6 +9,12 @@ using Microsoft.AspNetCore.Routing;
 
 namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
+    public interface IFluentActionDescriptorCache
+    {
+        IEnumerable<ActionDescriptor> Lookup(ControllerRoute route);
+        IEnumerable<ActionDescriptor> Lookup(LambdaRoute route);
+
+    }
     public class FluentActionDescriptorCache : IFluentActionDescriptorCache
     {
         private static readonly ActionDescriptor[] EMPTY_RESULT = new ActionDescriptor[0];

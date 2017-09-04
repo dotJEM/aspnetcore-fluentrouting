@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using DotJEM.AspNetCore.FluentRouting.Builders;
 using DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects;
+using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -12,6 +13,11 @@ using Microsoft.Extensions.Options;
 
 namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
+    public interface IFluentActionDescriptorFactory
+    {
+        IEnumerable<ActionDescriptor> CreateDescriptors(ControllerRoute route);
+        IEnumerable<ActionDescriptor> CreateDescriptors(LambdaRoute route);
+    }
     public class FluentActionDescriptorFactory : IFluentActionDescriptorFactory
     {
         private readonly IApplicationModelProvider[] providers;

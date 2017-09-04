@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace DotJEM.AspNetCore.FluentRouting.Routing
+namespace DotJEM.AspNetCore.FluentRouting.Routing.Lambdas
 {
     public class LambdaDescriptor : ActionDescriptor
     {
