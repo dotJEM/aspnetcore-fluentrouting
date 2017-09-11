@@ -1,4 +1,4 @@
-# DotJEM Fluent Routing for AspNetCore 2.0+
+# Fluent Routing syntax for AspNetCore 2.0+
 
 WIP! - This is still in it's very early stages and far from done.
 
