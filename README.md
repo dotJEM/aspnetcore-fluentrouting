@@ -46,6 +46,7 @@ app.UseFluentRouter(router => {
 
 Services:
 ```CSharp
+// Inject Service into Service Container...
 interface IMyService {
     MyStuff Fetch(string type, int id);
 }
