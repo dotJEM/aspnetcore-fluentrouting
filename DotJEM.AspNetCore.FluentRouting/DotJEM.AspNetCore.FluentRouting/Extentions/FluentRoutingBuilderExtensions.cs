@@ -12,6 +12,8 @@ namespace Microsoft.AspNetCore.Builder
         {
             if (app == null) throw new ArgumentNullException(nameof(app));
 
+            //app.ApplicationServices.GetRequiredService<FluentRouteBuilder>();
+
             FluentRouteBuilder builder = new FluentRouteBuilder(app, app.ApplicationServices.GetRequiredService<FluentRouteHandler>());
 
             config(builder);

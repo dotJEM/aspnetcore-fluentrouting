@@ -30,7 +30,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
 
         public IEnumerable<ActionDescriptor> Lookup(ControllerRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
         public IEnumerable<ActionDescriptor> Lookup(LambdaRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
-        private IEnumerable<ActionDescriptor> GetOrAdd(IIdableRoute route, Func<IEnumerable<ActionDescriptor>> factory)
+        private IEnumerable<ActionDescriptor> GetOrAdd(IIdentifiableRoute route, Func<IEnumerable<ActionDescriptor>> factory)
         {
             if(route == null) return EMPTY_RESULT;
 

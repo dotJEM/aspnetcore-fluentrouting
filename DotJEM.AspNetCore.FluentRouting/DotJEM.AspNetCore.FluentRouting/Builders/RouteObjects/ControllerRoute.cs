@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects
 {
-    public class ControllerRoute : Route, IIdableRoute
+    public class ControllerRoute : Route, IIdentifiableRoute
     {
         public Guid Id { get; } = Guid.NewGuid();
 
