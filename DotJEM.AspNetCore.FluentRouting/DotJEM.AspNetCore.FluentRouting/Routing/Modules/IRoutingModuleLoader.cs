@@ -14,7 +14,6 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing.Modules
 
     public class RoutingModuleLoader : IRoutingModuleLoader
     {
-
         public IRoutingModuleLoader Load<T>()
         {
             throw new NotImplementedException();

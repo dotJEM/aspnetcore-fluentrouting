@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using DotJEM.AspNetCore.FluentRouting.Conventions;
 using DotJEM.AspNetCore.FluentRouting.Invoker;
 using DotJEM.AspNetCore.FluentRouting.Invoker.Execution;
 using DotJEM.AspNetCore.FluentRouting.Routing;
@@ -27,8 +28,13 @@ namespace DotJEM.AspNetCore.FluentRouting.Extentions
             if (services == null) throw new ArgumentNullException(nameof(services));
 
             services.TryAddSingleton<IActionSelector, FluentActionSelector>();
-
+            // services.AddRouting();
+            // Adding MVC Core 
             services.AddMvcCore();
+            //services.AddMvcCore(options =>
+            //{
+            //    options.Conventions.Add(new FluentParameterApplicationModelConvention());
+            //});
 
             services.TryAddSingleton<LambdaInvokerCache>();
             services.TryAddSingleton<FluentRouteHandler>();

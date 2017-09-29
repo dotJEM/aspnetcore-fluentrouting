@@ -1,6 +1,7 @@
 ﻿using System;
 using DotJEM.AspNetCore.FluentRouting.Builders;
 using DotJEM.AspNetCore.FluentRouting.Routing;
+using DotJEM.AspNetCore.FluentRouting.Routing.Modules;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -11,6 +12,9 @@ namespace Microsoft.AspNetCore.Builder
         public static IApplicationBuilder UseFluentRouter(this IApplicationBuilder app, Action<IFluentRouteBuilder> config)
         {
             if (app == null) throw new ArgumentNullException(nameof(app));
+
+
+            //app.ApplicationServices.GetRequiredService<IRoutingModuleLoader>();
 
             FluentRouteBuilder builder = new FluentRouteBuilder(app, app.ApplicationServices.GetRequiredService<FluentRouteHandler>());
 
