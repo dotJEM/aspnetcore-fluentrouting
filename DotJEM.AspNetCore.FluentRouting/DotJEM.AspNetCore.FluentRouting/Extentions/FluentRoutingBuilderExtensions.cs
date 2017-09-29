@@ -16,6 +16,8 @@ namespace Microsoft.AspNetCore.Builder
 
             //app.ApplicationServices.GetRequiredService<IRoutingModuleLoader>();
 
+            //app.ApplicationServices.GetRequiredService<FluentRouteBuilder>();
+
             FluentRouteBuilder builder = new FluentRouteBuilder(app, app.ApplicationServices.GetRequiredService<FluentRouteHandler>());
 
             config(builder);

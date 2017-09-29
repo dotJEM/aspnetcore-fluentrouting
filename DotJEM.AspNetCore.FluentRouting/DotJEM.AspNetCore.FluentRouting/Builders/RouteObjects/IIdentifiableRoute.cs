@@ -5,7 +5,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects
     /// <summary>
     /// Constitudes a route that provides a globally unique identifier.
     /// </summary>
-    public interface IIdableRoute
+    public interface IIdentifiableRoute
     {
         Guid Id { get; }
     }

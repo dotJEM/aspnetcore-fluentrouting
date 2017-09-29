@@ -5,6 +5,7 @@ using System.Linq;
 using DotJEM.AspNetCore.FluentRouting.Builders;
 using DotJEM.AspNetCore.FluentRouting.Builders.RouteObjects;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 
 namespace DotJEM.AspNetCore.FluentRouting.Routing
@@ -21,7 +22,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
 
         private readonly IFluentActionDescriptorFactory factory;
         private readonly ConcurrentDictionary<Guid, IList<ActionDescriptor>> cache = new ConcurrentDictionary<Guid, IList<ActionDescriptor>>();
-
+        
         public FluentActionDescriptorCache(IFluentActionDescriptorFactory factory)
         {
             this.factory = factory;
@@ -29,7 +30,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
 
         public IEnumerable<ActionDescriptor> Lookup(ControllerRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
         public IEnumerable<ActionDescriptor> Lookup(LambdaRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
-        private IEnumerable<ActionDescriptor> GetOrAdd(IIdableRoute route, Func<IEnumerable<ActionDescriptor>> factory)
+        private IEnumerable<ActionDescriptor> GetOrAdd(IIdentifiableRoute route, Func<IEnumerable<ActionDescriptor>> factory)
         {
             if(route == null) return EMPTY_RESULT;
 

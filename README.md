@@ -1,6 +1,6 @@
-# DotJEM Fluent Routing for AspNetCore 2.0+
+# Fluent Routing syntax for AspNetCore 2.0+
 
-WIP! - This is still in it's very early stages and far from done.
+WIP! - This is still in it's very early stages and far from done. - Ideas and Contributions are still more than wellcome though!...
 
 The main features are:
  - Define Routes in a Fluent Syntax
@@ -46,6 +46,7 @@ app.UseFluentRouter(router => {
 
 Services:
 ```CSharp
+// Inject Service into Service Container...
 interface IMyService {
     MyStuff Fetch(string type, int id);
 }

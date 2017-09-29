@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotJEM.AspNetCore.FluentRouting", "DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.csproj", "{FE410C5A-3789-4D74-AB92-0D6DD3EB4645}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotJEM.AspNetCore.FluentRouting", "DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.csproj", "{FE410C5A-3789-4D74-AB92-0D6DD3EB4645}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{7675DE16-B555-4A01-83A8-540CFE2BB5FD}"
 EndProject
@@ -11,7 +11,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetFramework", "NetFramewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetCore", "NetCore", "{9478C941-9F4F-47E6-A85F-CC1BF49FED17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debugging", "Debugging\Debugging.csproj", "{2D42E684-504D-4A2D-95F2-7AE4F2DED1CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debugging", "Debugging\Debugging.csproj", "{2D42E684-504D-4A2D-95F2-7AE4F2DED1CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{3CA1A03F-A434-41CC-A7BC-BE2C7351BA80}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
