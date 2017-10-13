@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DotJEM.AspNetCore.FluentRouting.Views\DotJEM.AspNetCore.FluentRouting.Views.csproj" />
     <ProjectReference Include="..\DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.csproj" />
   </ItemGroup>
 
