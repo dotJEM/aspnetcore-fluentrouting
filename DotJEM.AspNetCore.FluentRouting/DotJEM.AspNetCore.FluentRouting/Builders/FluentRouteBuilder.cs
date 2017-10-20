@@ -27,6 +27,11 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
         //IFluentRouteConfigurator RouteTrace(string template);
     }
 
+    public static class FluentRouteBuilderExt
+    {
+        public static IFluentRouteConfigurator Default(this IFluentRouteBuilder self) => self.Route("{*url}");
+    }
+
     public class FluentRouteBuilder : IFluentRouteBuilder
     {
         private readonly IApplicationBuilder app;

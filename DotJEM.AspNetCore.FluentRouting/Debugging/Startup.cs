@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Debugging.Controllers;
+using DotJEM.AspNetCore.FluentRouting.Builders;
 using DotJEM.AspNetCore.FluentRouting.Extentions;
 using DotJEM.AspNetCore.FluentRouting.Routing;
 using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
@@ -58,7 +59,7 @@ namespace Debugging
                     return entity;
                 });
 
-                router.Route("").ToView("~/views/index.cshtml");
+                router.Default().ToView("~/views/index.cshtml");
 
 
                 //router.Load<MyModule>();
