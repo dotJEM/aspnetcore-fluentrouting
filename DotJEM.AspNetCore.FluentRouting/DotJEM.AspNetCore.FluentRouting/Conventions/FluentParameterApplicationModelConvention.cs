@@ -20,6 +20,14 @@ namespace DotJEM.AspNetCore.FluentRouting.Conventions
 
             //if (IsConventionApplicable(action.Controller))
             //{
+
+            HashSet<string> optionalParameters = new HashSet<string>();
+            BindingSource uriBindingSource = BindingSource.Path;
+
+            foreach (ParameterModel parameter in action.Parameters)
+            {
+                
+            }
             //    var optionalParameters = new HashSet<string>();
             //    var uriBindingSource = (new FromUriAttribute()).BindingSource;
             //    foreach (var parameter in action.Parameters)
@@ -75,13 +83,13 @@ namespace DotJEM.AspNetCore.FluentRouting.Conventions
         private static bool IsSimpleType(Type type)
         {
             return type.GetTypeInfo().IsPrimitive ||
-                type.Equals(typeof(decimal)) ||
-                type.Equals(typeof(string)) ||
-                type.Equals(typeof(DateTime)) ||
-                type.Equals(typeof(Guid)) ||
-                type.Equals(typeof(DateTimeOffset)) ||
-                type.Equals(typeof(TimeSpan)) ||
-                type.Equals(typeof(Uri));
+                type == typeof(decimal) ||
+                type == typeof(string) ||
+                type == typeof(DateTime) ||
+                type == typeof(Guid) ||
+                type == typeof(DateTimeOffset) ||
+                type == typeof(TimeSpan) ||
+                type == typeof(Uri);
         }
     }
 }

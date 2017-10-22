@@ -24,6 +24,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing.Lambdas
             //Note: Functions cannot have properties.
             BoundProperties = null;
 
+            
         }
 
         private static IEnumerable<ParameterDescriptor> CreateParameterDescriptors(ParameterInfo[] parameters)
