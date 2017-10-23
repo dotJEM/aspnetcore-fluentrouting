@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Debugging.Controllers;
+using DotJEM.AspNetCore.FluentRouting.Builders;
 using DotJEM.AspNetCore.FluentRouting.Extentions;
 using DotJEM.AspNetCore.FluentRouting.Routing;
 using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
+using DotJEM.AspNetCore.FluentRouting.Views;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -43,6 +45,8 @@ namespace Debugging
 
             app.UseFluentRouter(router =>
             {
+                router.Route("").ToView("~/views/index.cshtml");
+
                 router.Route("hello").To(() => JObject.FromObject(new {hello = "World"}));
                 router.Route("api/values/{id?}").To<ValuesController>();
                 router.Route("api/context/{id?}").To(context => "HELLO CONTEXT");
@@ -56,8 +60,11 @@ namespace Debugging
                     return entity;
                 });
 
+                router.Default().ToView("~/views/index.cshtml");
+
+
                 //router.Load<MyModule>();
-                
+
             });
         }
     }

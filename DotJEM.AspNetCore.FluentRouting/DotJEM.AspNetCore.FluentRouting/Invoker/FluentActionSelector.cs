@@ -16,7 +16,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
     public class FluentActionSelector : IActionSelector
     {
         //TODO: Can we avoid so much code duplication here - most is copied from the standard MVC selector?...
-        private readonly ActionSelector selector;
+        //private readonly ActionSelector selector;
         private readonly IFluentActionDescriptorCache cache;
         private readonly ActionConstraintCache actionConstraintCache;
 

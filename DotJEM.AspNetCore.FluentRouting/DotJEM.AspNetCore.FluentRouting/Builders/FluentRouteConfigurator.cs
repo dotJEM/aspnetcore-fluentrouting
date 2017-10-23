@@ -1,25 +1,19 @@
 using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 
 namespace DotJEM.AspNetCore.FluentRouting.Builders
 {
     public interface INamedFluentRouteConfigurator
     {
-        //Note: Controller Routes.
+        // Note: Controller Routes:
         IFluentRouteBuilder To<TController>();
 
-
-        //IFluentRouteBuilder To<TResult>(Func<TResult> handler);
-        //IFluentRouteBuilder To<T1, TResult>(Func<T1, TResult> handler);
-        //IFluentRouteBuilder To<T1, T2, TResult>(Func<T1, T2, TResult> handler);
-        //IFluentRouteBuilder To<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> handler);
-        //IFluentRouteBuilder To<TResult>(Func<HttpContext, TResult> handler);
-        //IFluentRouteBuilder To<TContext, TDependency, TResult>(Func<TContext, TDependency, TResult> handler) where TContext: FluentContext;
-        //IFluentRouteBuilder To<TContext>(Action<TContext> handler) where TContext : FluentContext;
-        //IFluentRouteBuilder To<TContext, TDependency>(Action<TContext, TDependency> handler) where TContext : FluentContext;
+        // Note: Lanbda Routes:
         IFluentRouteBuilder To<TResult>(Func<HttpContext, TResult> handler);
-
         IFluentRouteBuilder To<TResult>(Func<TResult> handler);
         IFluentRouteBuilder To<T1, TResult>(Func<T1, TResult> handler);
         IFluentRouteBuilder To<T1, T2, TResult>(Func<T1, T2, TResult> handler);
@@ -68,13 +62,6 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
                 new RouteValueDictionary(dataTokens));
         }
 
-        //public IFluentRouteBuilder To<T1, TResult>(Func<T1, TResult> handler) => To(handler);
-        //public IFluentRouteBuilder To<T1, T2, TResult>(Func<T1, T2, TResult> handler) => To(handler);
-        //public IFluentRouteBuilder To<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> handler) => To(handler);
-
-        //public IFluentRouteBuilder To<TResult>(Func<TResult> handler) => To(handler);
-
-        //public IFluentRouteBuilder To<TResult>(Func<HttpContext, TResult> handler) => To(handler);
         public IFluentRouteBuilder To<TResult>(Func<HttpContext, TResult> handler) => ToDelegate(handler);
         public IFluentRouteBuilder To<TResult>(Func<TResult> handler) => ToDelegate(handler);
         public IFluentRouteBuilder To<T1, TResult>(Func<T1, TResult> handler) => ToDelegate(handler);
@@ -102,22 +89,6 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
                 new RouteValueDictionary(constraints),
                 new RouteValueDictionary(dataTokens));
         }
-
-        //public IFluentRouteBuilder To<TContext, TDependency, TResult>(Func<TContext, TDependency, TResult> handler) where TContext : FluentContext
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IFluentRouteBuilder To<TContext>(Action<TContext> handler) where TContext : FluentContext
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IFluentRouteBuilder To<TContext, TDependency>(Action<TContext, TDependency> handler) where TContext : FluentContext
-        //{
-        //    throw new NotImplementedException();
-        //}
-
 
         public INamedFluentRouteConfigurator Named(string name)
         {
