@@ -31,7 +31,8 @@ namespace Debugging
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddMvc();
+            //TODO: Commenting out AddMvc should work, but it changes a bit... Need to figure that one out...
+            services.AddMvc();
             services.AddFluentRouting();
         }
 

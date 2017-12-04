@@ -43,6 +43,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
         public IEnumerable<ActionDescriptor> CreateDescriptors(LambdaRoute route)
         {
             ActionModel model = FixFaxModelConventions.CreateFluentActionModel(route.Delegate.Method);
+            FixFaxModelConventions.ApplyConventions(model);
 
             return new []{ new LambdaDescriptor(route.Delegate) };
         }
@@ -62,26 +63,34 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
     {
         public static void ApplyConventions(ApplicationModel applicationModel, IEnumerable<IApplicationModelConvention> conventions)
         {
-            if (applicationModel == null)
-                throw new ArgumentNullException(nameof(applicationModel));
-            if (conventions == null)
-                throw new ArgumentNullException(nameof(conventions));
+            if (applicationModel == null) throw new ArgumentNullException(nameof(applicationModel));
+            if (conventions == null) throw new ArgumentNullException(nameof(conventions));
+
+
             foreach (IApplicationModelConvention convention in conventions)
                 convention.Apply(applicationModel);
-            foreach (ControllerModel controller in (IEnumerable<ControllerModel>)applicationModel.Controllers)
+
+
+            foreach (ControllerModel controller in applicationModel.Controllers)
             {
-                foreach (IControllerModelConvention controllerModelConvention in controller.Attributes.OfType<IControllerModelConvention>().ToArray<IControllerModelConvention>())
+                foreach (IControllerModelConvention controllerModelConvention in controller.Attributes.OfType<IControllerModelConvention>())
                     controllerModelConvention.Apply(controller);
-                foreach (ActionModel action in (IEnumerable<ActionModel>)controller.Actions)
+                foreach (ActionModel action in controller.Actions)
                 {
-                    foreach (IActionModelConvention actionModelConvention in action.Attributes.OfType<IActionModelConvention>().ToArray<IActionModelConvention>())
-                        actionModelConvention.Apply(action);
-                    foreach (ParameterModel parameter in (IEnumerable<ParameterModel>)action.Parameters)
-                    {
-                        foreach (IParameterModelConvention parameterModelConvention in parameter.Attributes.OfType<IParameterModelConvention>().ToArray<IParameterModelConvention>())
-                            parameterModelConvention.Apply(parameter);
-                    }
+                    ApplyConventions(action);
                 }
+            }
+        }
+
+        public static void ApplyConventions(ActionModel action)
+        {
+            foreach (IActionModelConvention actionModelConvention in action.Attributes.OfType<IActionModelConvention>())
+                actionModelConvention.Apply(action);
+
+            foreach (ParameterModel parameter in action.Parameters)
+            {
+                foreach (IParameterModelConvention parameterModelConvention in parameter.Attributes.OfType<IParameterModelConvention>())
+                    parameterModelConvention.Apply(parameter);
             }
         }
 
@@ -172,25 +181,21 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
             //
             // Note that having a route attribute that doesn't define a route template _might_ be an error. We
             // don't have enough context to really know at this point so we just pass it on.
-            var routeProviders = new List<IRouteTemplateProvider>();
+            List<IRouteTemplateProvider> routeProviders = new List<IRouteTemplateProvider>();
 
-            var createSelectorForSilentRouteProviders = false;
-            foreach (var attribute in attributes)
+            bool createSelectorForSilentRouteProviders = false;
+            foreach (object attribute in attributes)
             {
-                if (attribute is IRouteTemplateProvider routeTemplateProvider)
-                {
-                    if (IsSilentRouteAttribute(routeTemplateProvider))
-                    {
-                        createSelectorForSilentRouteProviders = true;
-                    }
-                    else
-                    {
-                        routeProviders.Add(routeTemplateProvider);
-                    }
-                }
+                if (!(attribute is IRouteTemplateProvider routeTemplateProvider))
+                    continue;
+
+                if (IsSilentRouteAttribute(routeTemplateProvider))
+                    createSelectorForSilentRouteProviders = true;
+                else
+                    routeProviders.Add(routeTemplateProvider);
             }
 
-            foreach (var routeProvider in routeProviders)
+            foreach (IRouteTemplateProvider routeProvider in routeProviders)
             {
                 // If we see an attribute like
                 // [Route(...)]
@@ -211,12 +216,10 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
                 //
                 // Is one selector.
                 if (!(routeProvider is IActionHttpMethodProvider))
-                {
                     createSelectorForSilentRouteProviders = false;
-                }
             }
 
-            var selectorModels = new List<SelectorModel>();
+            List<SelectorModel> selectorModels = new List<SelectorModel>();
             if (routeProviders.Count == 0 && !createSelectorForSilentRouteProviders)
             {
                 // Simple case, all attributes apply
@@ -226,10 +229,10 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
             {
                 // Each of these routeProviders are the ones that actually have routing information on them
                 // something like [HttpGet] won't show up here, but [HttpGet("Products")] will.
-                foreach (var routeProvider in routeProviders)
+                foreach (IRouteTemplateProvider routeProvider in routeProviders)
                 {
-                    var filteredAttributes = new List<object>();
-                    foreach (var attribute in attributes)
+                    List<object> filteredAttributes = new List<object>();
+                    foreach (object attribute in attributes)
                     {
                         if (ReferenceEquals(attribute, routeProvider))
                         {
@@ -242,9 +245,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
                             // [HttpGet("template")]
                             // [Route("template/{id}")]
                         }
-                        else if (
-                            routeProvider is IActionHttpMethodProvider &&
-                            attribute is IActionHttpMethodProvider)
+                        else if (routeProvider is IActionHttpMethodProvider && attribute is IActionHttpMethodProvider)
                         {
                             // Example:
                             // [HttpGet("template")]
@@ -264,8 +265,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
 
                 if (createSelectorForSilentRouteProviders)
                 {
-                    var filteredAttributes = new List<object>();
-                    foreach (var attribute in attributes)
+                    List<object> filteredAttributes = new List<object>();
+                    foreach (object attribute in attributes)
                     {
                         if (!InRouteProviders(routeProviders, attribute))
                         {
@@ -273,7 +274,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
                         }
                     }
 
-                    selectorModels.Add(CreateSelectorModel(route: null, attributes: filteredAttributes));
+                    selectorModels.Add(CreateSelectorModel(null, filteredAttributes));
                 }
             }
 
@@ -282,7 +283,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
 
         private static SelectorModel CreateSelectorModel(IRouteTemplateProvider route, IList<object> attributes)
         {
-            var selectorModel = new SelectorModel();
+            SelectorModel selectorModel = new SelectorModel();
             if (route != null)
             {
                 selectorModel.AttributeRouteModel = new AttributeRouteModel(route);

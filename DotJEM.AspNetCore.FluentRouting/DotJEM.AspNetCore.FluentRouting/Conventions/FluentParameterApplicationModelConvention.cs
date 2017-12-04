@@ -27,6 +27,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Conventions
             foreach (ParameterModel parameter in action.Parameters)
             {
                 
+                
             }
             //    var optionalParameters = new HashSet<string>();
             //    var uriBindingSource = (new FromUriAttribute()).BindingSource;
