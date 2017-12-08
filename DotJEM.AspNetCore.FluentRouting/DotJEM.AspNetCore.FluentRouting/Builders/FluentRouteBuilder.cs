@@ -61,6 +61,13 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
             routes.Add(new ControllerRoute(controllerType, handler, name, template, defaults, constraints, dataTokens, resolver));
             return this;
         }
+
+
+        public IFluentRouteBuilder AddIgnoreRoute(string name, string template)
+        {
+            throw new NotImplementedException();
+        }
+
         public IFluentRouteBuilder AddDelegateRoute(Delegate lambda, string name, string template, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens)
         {
             IInlineConstraintResolver resolver = app.ApplicationServices.GetRequiredService<IInlineConstraintResolver>();

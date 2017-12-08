@@ -30,11 +30,11 @@ namespace DotJEM.AspNetCore.FluentRouting.Extentions
             services.TryAddSingleton<IActionSelector, FluentActionSelector>();
             // services.AddRouting();
             // Adding MVC Core 
-            services.AddMvcCore();
-            //services.AddMvcCore(options =>
-            //{
-            //    options.Conventions.Add(new FluentParameterApplicationModelConvention());
-            //});
+            //services.AddMvcCore();
+            services.AddMvcCore(options =>
+            {
+                options.Conventions.Add(new FluentParameterActionModelConvention());
+            });
 
             services.TryAddSingleton<LambdaInvokerCache>();
             services.TryAddSingleton<FluentRouteHandler>();

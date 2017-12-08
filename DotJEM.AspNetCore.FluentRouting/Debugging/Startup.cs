@@ -47,11 +47,15 @@ namespace Debugging
             app.UseFluentRouter(router =>
             {
                 router.Route("").ToView("~/views/index.cshtml");
-
+                
                 router.Route("hello").To(() => JObject.FromObject(new {hello = "World"}));
+
                 router.Route("api/values/{id?}").To<ValuesController>();
+
                 router.Route("api/context/{id?}").To(context => "HELLO CONTEXT");
+                
                 router.Route("api/conven").To((string key, string value) => { return key + value; });
+
                 router.Route("api/services/{param}").To((FromRoute<string> param, FromQuery<string> take, FromBody<JObject> body, FromServices<IActionSelector> selector)
                     =>
                 {

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace DotJEM.AspNetCore.FluentRouting.Conventions
 {
-    public class FluentParameterApplicationModelConvention : IActionModelConvention
+    public class FluentParameterActionModelConvention : IActionModelConvention
     {
         public void Apply(ActionModel action)
         {

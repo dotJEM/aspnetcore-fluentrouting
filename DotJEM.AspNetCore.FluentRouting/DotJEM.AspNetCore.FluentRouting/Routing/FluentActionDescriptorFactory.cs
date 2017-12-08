@@ -43,6 +43,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
         public IEnumerable<ActionDescriptor> CreateDescriptors(LambdaRoute route)
         {
             ActionModel model = FixFaxModelConventions.CreateFluentActionModel(route.Delegate.Method);
+            
+
             FixFaxModelConventions.ApplyConventions(model);
 
             return new []{ new LambdaDescriptor(route.Delegate) };
@@ -97,48 +99,49 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
         public static ActionModel CreateFluentActionModel(MethodInfo methodInfo)
         {
             //Note: Always empty?
-            object[] customAttributes = methodInfo.GetCustomAttributes(true);
+            //object[] customAttributes = methodInfo.GetCustomAttributes(true);
 
-            ActionModel actionModel = new ActionModel(methodInfo, customAttributes);
+            ActionModel actionModel = new ActionModel(methodInfo, new List<object>());
 
-            foreach (IFilterMetadata metadata in customAttributes.OfType<IFilterMetadata>())
-                actionModel.Filters.Add(metadata);
+            //NOTE: All this seems irellevant for Lambda routes as they can't have custom attributes?
+            //foreach (IFilterMetadata metadata in customAttributes.OfType<IFilterMetadata>())
+            //    actionModel.Filters.Add(metadata);
 
-            ActionNameAttribute actionNameAttribute = customAttributes
-                .OfType<ActionNameAttribute>()
-                .FirstOrDefault();
+            //ActionNameAttribute actionNameAttribute = customAttributes
+            //    .OfType<ActionNameAttribute>()
+            //    .FirstOrDefault();
 
-            actionModel.ActionName = actionNameAttribute?.Name ?? methodInfo.Name;
-            IApiDescriptionVisibilityProvider visibilityProvider = customAttributes
-                .OfType<IApiDescriptionVisibilityProvider>()
-                .FirstOrDefault();
+            //actionModel.ActionName = actionNameAttribute?.Name ?? methodInfo.Name;
+            //IApiDescriptionVisibilityProvider visibilityProvider = customAttributes
+            //    .OfType<IApiDescriptionVisibilityProvider>()
+            //    .FirstOrDefault();
 
-            if (visibilityProvider != null)
-                actionModel.ApiExplorer.IsVisible = !visibilityProvider.IgnoreApi;
+            //if (visibilityProvider != null)
+            //    actionModel.ApiExplorer.IsVisible = !visibilityProvider.IgnoreApi;
 
-            IApiDescriptionGroupNameProvider groupNameProvider = customAttributes
-                .OfType<IApiDescriptionGroupNameProvider>()
-                .FirstOrDefault();
+            //IApiDescriptionGroupNameProvider groupNameProvider = customAttributes
+            //    .OfType<IApiDescriptionGroupNameProvider>()
+            //    .FirstOrDefault();
 
-            if (groupNameProvider != null)
-                actionModel.ApiExplorer.GroupName = groupNameProvider.GroupName;
+            //if (groupNameProvider != null)
+            //    actionModel.ApiExplorer.GroupName = groupNameProvider.GroupName;
 
-            foreach (IRouteValueProvider routeValueProvider in customAttributes.OfType<IRouteValueProvider>())
-                actionModel.RouteValues.Add(routeValueProvider.RouteKey, routeValueProvider.RouteValue);
+            //foreach (IRouteValueProvider routeValueProvider in customAttributes.OfType<IRouteValueProvider>())
+            //    actionModel.RouteValues.Add(routeValueProvider.RouteKey, routeValueProvider.RouteValue);
 
-            IRouteTemplateProvider[] array = methodInfo
-                .GetCustomAttributes(false)
-                .OfType<IRouteTemplateProvider>()
-                .ToArray();
+            //IRouteTemplateProvider[] array = methodInfo
+            //    .GetCustomAttributes(false)
+            //    .OfType<IRouteTemplateProvider>()
+            //    .ToArray();
 
-            List<object> objectList = new List<object>();
-            foreach (object obj in customAttributes)
-            {
-                if (!(obj is IRouteTemplateProvider))
-                    objectList.Add(obj);
-            }
-            objectList.AddRange(array);
-            foreach (SelectorModel model in CreateSelectors(objectList))
+            //List<object> objectList = new List<object>();
+            //foreach (object obj in customAttributes)
+            //{
+            //    if (!(obj is IRouteTemplateProvider))
+            //        objectList.Add(obj);
+            //}
+            //objectList.AddRange(array);
+            foreach (SelectorModel model in CreateSelectors(new List<object>()))
                 actionModel.Selectors.Add(model);
 
             return actionModel;
