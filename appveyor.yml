@@ -1,0 +1,33 @@
+version: 0.0.{build}
+
+configuration: Release
+
+init:
+- ps: $env:nuget_ver=$env:appveyor_build_version
+- ps: Update-AppveyorBuild -Version "$env:appveyor_build_version+sha.$($env:appveyor_repo_commit.substring(0,7))"
+
+nuget:
+  disable_publish_on_pr: true
+
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: $(nuget_ver)
+  assembly_file_version: $(nuget_ver)
+  assembly_informational_version: '{version}'
+  
+matrix:
+  fast_finish: true # fail fast!
+
+clone_depth: 3  
+
+pull_requests:
+  do_not_increment_build_number: true
+
+before_build:
+  nuget restore DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.sln
+
+build:
+  project: DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.sln
+  publish_nuget: true
+  publish_nuget_symbols: true
