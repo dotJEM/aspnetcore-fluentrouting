@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Adds the capability to server Razor views using DotJEM.AspNetCore.FluentRouting routes.</Description>
+    <Copyright>Copyright © DotJEM 2018</Copyright>
+    <PackageLicenseUrl>https://github.com/dotJEM/aspnetcore-fluentrouting/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dotJEM/aspnetcore-fluentrouting</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dotJEM/aspnetcore-fluentrouting</RepositoryUrl>
+    <PackageTags>AspNetCore Routing Fluent Razor View</PackageTags>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
