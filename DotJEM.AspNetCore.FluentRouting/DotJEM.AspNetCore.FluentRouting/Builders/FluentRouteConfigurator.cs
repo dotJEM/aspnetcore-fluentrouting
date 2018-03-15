@@ -95,7 +95,9 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
 
         public IFluentRouteBuilder Through()
         {
-            
+            return builder.AddIgnoreRoute(
+                Name,
+                Template);
         }
 
         public INamedFluentRouteConfigurator Named(string name)

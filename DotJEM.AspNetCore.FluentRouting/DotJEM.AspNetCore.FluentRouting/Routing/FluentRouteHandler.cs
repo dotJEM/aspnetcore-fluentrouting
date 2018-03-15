@@ -19,15 +19,21 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
         private readonly ILogger logger;
         private readonly IActionContextAccessor actionContextAccessor;
         private readonly IActionInvokerFactory actionInvokerFactory;
+        private readonly IFluentActionDescriptorCache cache;
+        private readonly IActionSelector selector;
 
         public FluentRouteHandler(
             ILoggerFactory loggerFactory, 
             IServiceProvider serviceProvider,
-            IActionInvokerFactory actionInvokerFactory,
+            IActionInvokerFactory actionInvokerFactory, 
+            IFluentActionDescriptorCache cache, 
+            IActionSelector selector, 
             IActionContextAccessor actionContextAccessor = null)
         {
             this.serviceProvider = serviceProvider;
             this.actionInvokerFactory = actionInvokerFactory;
+            this.cache = cache;
+            this.selector = selector;
             this.actionContextAccessor = actionContextAccessor;
             this.logger = loggerFactory.CreateLogger<FluentRouteHandler>();
         }
@@ -42,15 +48,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
-
-            //TODO: Inject in CTOR.
-            IFluentActionDescriptorFactory factory = serviceProvider.GetService<IFluentActionDescriptorFactory>();
-            //TODO: Inject in CTOR.
-            IFluentActionDescriptorCache cache = new FluentActionDescriptorCache(factory);
-
-            //TODO: Inject in CTOR.
-            FluentActionSelector selector = new FluentActionSelector(cache, serviceProvider.GetService<ActionConstraintCache>());
-
+            
             IReadOnlyList<ActionDescriptor> candidates = selector.SelectCandidates(context);
             if (candidates == null || candidates.Count < 1)
             {

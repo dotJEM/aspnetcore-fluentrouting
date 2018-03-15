@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotJEM.AspNetCore.FluentRouting", "DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.csproj", "{FE410C5A-3789-4D74-AB92-0D6DD3EB4645}"
 EndProject
@@ -16,11 +16,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{3CA1A03F-A434-41CC-A7BC-BE2C7351BA80}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
+		..\appveyor.yml = ..\appveyor.yml
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotJEM.AspNetCore.FluentRouting.Views", "DotJEM.AspNetCore.FluentRouting.Views\DotJEM.AspNetCore.FluentRouting.Views.csproj", "{28A173BE-F509-44EE-9391-95CA361EB702}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotJEM.AspNetCore.FluentRouting.Views", "DotJEM.AspNetCore.FluentRouting.Views\DotJEM.AspNetCore.FluentRouting.Views.csproj", "{28A173BE-F509-44EE-9391-95CA361EB702}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

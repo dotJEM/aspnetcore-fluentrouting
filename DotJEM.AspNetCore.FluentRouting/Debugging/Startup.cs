@@ -32,8 +32,8 @@ namespace Debugging
         public void ConfigureServices(IServiceCollection services)
         {
             //TODO: Commenting out AddMvc should work, but it changes a bit... Need to figure that one out...
-            services.AddMvc();
             services.AddFluentRouting();
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

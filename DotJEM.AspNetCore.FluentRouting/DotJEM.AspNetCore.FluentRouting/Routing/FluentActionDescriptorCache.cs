@@ -32,9 +32,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
         public IEnumerable<ActionDescriptor> Lookup(LambdaRoute route) => GetOrAdd(route, () => factory.CreateDescriptors(route));
         private IEnumerable<ActionDescriptor> GetOrAdd(IIdentifiableRoute route, Func<IEnumerable<ActionDescriptor>> factory)
         {
-            if(route == null) return EMPTY_RESULT;
-
-            return cache.GetOrAdd(route.Id, s => factory().ToList());
+            return route == null ? EMPTY_RESULT : cache.GetOrAdd(route.Id, s => factory().ToList());
         }
     }
 }
