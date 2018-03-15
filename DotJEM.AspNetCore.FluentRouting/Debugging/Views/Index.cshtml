@@ -4,9 +4,11 @@
 </head>
 <body>
 
-@Html.Raw("FOO")
+    @Html.Raw("FOO")
 
-HELLO VIEW @DateTime.Now.ToShortDateString()
+    HELLO VIEW @DateTime.Now.ToShortDateString()
+
+    @Model.Message
 </body>
 
 

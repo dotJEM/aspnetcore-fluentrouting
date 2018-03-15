@@ -10,7 +10,10 @@ using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 using DotJEM.AspNetCore.FluentRouting.Views;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,6 +22,24 @@ using Newtonsoft.Json.Linq;
 
 namespace Debugging
 {
+    public class DummyViewDataProvider : IViewDataProvider
+    {
+        public class Model
+        {
+            public string Message { get; set; }
+        }
+
+        public ViewDataDictionary ViewData(string viewName, HttpContext context)
+        {
+            return new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) {Model = new Model
+            {
+                Message = "FOO IS HERE!"
+            }};
+        }
+
+        public ITempDataDictionary TempData(string viewName, HttpContext context) => null;
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -34,6 +55,7 @@ namespace Debugging
             //TODO: Commenting out AddMvc should work, but it changes a bit... Need to figure that one out...
             services.AddFluentRouting();
             services.AddMvc();
+            services.AddSingleton<IViewDataProvider>(new DummyViewDataProvider());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
