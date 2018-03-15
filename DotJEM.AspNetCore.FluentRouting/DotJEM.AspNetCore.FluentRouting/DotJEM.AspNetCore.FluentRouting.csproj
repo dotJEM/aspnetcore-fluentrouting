@@ -9,6 +9,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseUrl>https://github.com/dotJEM/aspnetcore-fluentrouting/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>AspNetCore Routing Fluent Lambda</PackageTags>
+    <Version>0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
