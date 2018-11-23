@@ -37,10 +37,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
          * IReadOnlyList<IValueProviderFactory> valueProviderFactories, 
          * int maxModelValidationErrors)
         */
-        internal LambdaInvoker(
-            ILogger logger, DiagnosticSource diagnosticSource,
-            LambdaActionContext context, LambdaInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
-            : base(diagnosticSource, logger, context, filters, context.ValueProviderFactories)
+        internal LambdaInvoker(ILogger logger, DiagnosticSource diagnosticSource, LambdaActionContext context, LambdaInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
+            : base(diagnosticSource, logger, new ActionResultTypeMapper(), context, filters, context.ValueProviderFactories)
         {
             this.context = context;
             this.cacheEntry = cacheEntry ?? throw new ArgumentNullException(nameof(cacheEntry));
