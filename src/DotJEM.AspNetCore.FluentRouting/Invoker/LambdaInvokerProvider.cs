@@ -6,6 +6,7 @@ using DotJEM.AspNetCore.FluentRouting.Routing.Lambdas;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
@@ -62,7 +63,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
             
             (LambdaInvokerCacheEntry entry, IFilterMetadata[] filters) = cache.Lookup(ctx);
 
-            context.Result = new LambdaInvoker(logger, diagnosticSource, ctx, entry, filters);
+            IActionResultTypeMapper missing = new ActionResultTypeMapper();
+            context.Result = new LambdaInvoker(logger, diagnosticSource, missing, ctx, entry, filters);
         }
 
 

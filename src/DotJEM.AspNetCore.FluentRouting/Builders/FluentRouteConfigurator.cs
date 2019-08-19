@@ -32,6 +32,10 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
 
         IFluentRouteBuilder ToDelegate(Delegate handler);
 
+        IFluentRouteConfigurator WithDefaults(object defaults);
+        IFluentRouteConfigurator WithConstraints(object constraints);
+        IFluentRouteConfigurator WithDataTokens(object dataTokens);
+
         IFluentRouteBuilder Through();
     }
 
@@ -54,6 +58,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
             Template = template;
             this.builder = builder;
         }
+
 
         public IFluentRouteBuilder To<TController>()
         {
@@ -103,6 +108,24 @@ namespace DotJEM.AspNetCore.FluentRouting.Builders
         public INamedFluentRouteConfigurator Named(string name)
         {
             Name = name;
+            return this;
+        }
+
+        public IFluentRouteConfigurator WithDefaults(object defaults)
+        {
+            this.defaults = defaults;
+            return this;
+        }
+
+        public IFluentRouteConfigurator WithConstraints(object constraints)
+        {
+            this.constraints = constraints;
+            return this;
+        }
+
+        public IFluentRouteConfigurator WithDataTokens(object dataTokens)
+        {
+            this.dataTokens = dataTokens;
             return this;
         }
     }

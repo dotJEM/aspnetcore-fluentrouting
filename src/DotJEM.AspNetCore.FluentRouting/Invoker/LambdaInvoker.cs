@@ -11,7 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
 namespace DotJEM.AspNetCore.FluentRouting.Invoker
@@ -38,14 +40,18 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
          * int maxModelValidationErrors)
         */
         internal LambdaInvoker(
-            ILogger logger, DiagnosticSource diagnosticSource,
-            LambdaActionContext context, LambdaInvokerCacheEntry cacheEntry, IFilterMetadata[] filters)
-            : base(diagnosticSource, logger, context, filters, context.ValueProviderFactories)
+            ILogger logger,
+            DiagnosticSource diagnosticSource,
+            IActionResultTypeMapper mapper,
+            LambdaActionContext context,
+            LambdaInvokerCacheEntry cacheEntry,
+            IFilterMetadata[] filters)
+            : base(diagnosticSource, logger, mapper, context, filters, context.ValueProviderFactories)
         {
             this.context = context;
             this.cacheEntry = cacheEntry ?? throw new ArgumentNullException(nameof(cacheEntry));
         }
-        
+
         protected override void ReleaseResources()
         {
             //Note: There is no resources to release for functions.
