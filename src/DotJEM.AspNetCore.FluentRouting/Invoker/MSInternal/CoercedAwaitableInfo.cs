@@ -56,8 +56,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
             // It's not directly awaitable, but maybe we can coerce it.
             // Currently we support coercing FSharpAsync<T>.
             if (ObjectMethodExecutorFSharpSupport.TryBuildCoercerFromFSharpAsyncToAwaitable(type,
-                out var coercerExpression,
-                out var coercerResultType))
+                out Expression coercerExpression,
+                out Type coercerResultType))
             {
                 if (AwaitableInfo.IsTypeAwaitable(coercerResultType, out AwaitableInfo coercedAwaitableInfo))
                 {

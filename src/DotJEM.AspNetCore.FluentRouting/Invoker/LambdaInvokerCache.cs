@@ -13,9 +13,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
 {
     public class LambdaInvokerCache
     {
-        private readonly ParameterBinder parameterBinder;
-        private readonly IModelBinderFactory modelBinderFactory;
-        private readonly IModelMetadataProvider modelMetadataProvider;
+        private readonly ILambdaBinderDelegateFactory lambdaBinderDelegateFactory;
         private readonly IFilterProvider[] filterProviders;
         private readonly ILambdaExecutorDelegateFactory delegateFactory = new LambdaExecutorDelegateFactory();
 
@@ -23,14 +21,10 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
             new ConcurrentDictionary<ActionDescriptor, LambdaInvokerCacheEntry>();
 
         public LambdaInvokerCache(
-            ParameterBinder parameterBinder, 
-            IModelBinderFactory modelBinderFactory,
-            IModelMetadataProvider modelMetadataProvider,
+            ILambdaBinderDelegateFactory lambdaBinderDelegateFactory,
             IEnumerable<IFilterProvider> filterProviders)
         {
-            this.parameterBinder = parameterBinder;
-            this.modelBinderFactory = modelBinderFactory;
-            this.modelMetadataProvider = modelMetadataProvider;
+            this.lambdaBinderDelegateFactory = lambdaBinderDelegateFactory;
             this.filterProviders = filterProviders.OrderBy(item => item.Order).ToArray();
         }
 
@@ -50,7 +44,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
 
                 LambdaExecutor executor;
                 if (CoercedAwaitableInfo.TryGetAwaitableInfo(descriptor.Delegate.Method.ReturnType,
-                    out var awaitableInfo))
+                    out CoercedAwaitableInfo awaitableInfo))
                 {
                     executor = new AsyncLambdaExecutor(
                         descriptor.Delegate,
@@ -65,9 +59,9 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker
                         delegateFactory.Create(descriptor.Delegate));
                 }
 
-                //TODO: Injectable service instead of static implementation.
-                LambdaBinderDelegate lambdaBinder = LambdaBinderDelegateProvider
-                    .CreateBinderDelegate(parameterBinder, modelBinderFactory, modelMetadataProvider, descriptor);
+                //TODO: Inject service instead.
+                LambdaBinderDelegate lambdaBinder = lambdaBinderDelegateFactory.CreateBinderDelegate(descriptor);
+
                 return (cache.GetOrAdd(descriptor, new LambdaInvokerCacheEntry(lambdaBinder, executor, filterFactoryResult.CacheableFilters)), filterMetadatas);
             }
             return (entry, FilterFactory.CreateUncachedFilters(filterProviders, context, entry.CacheableFilters));

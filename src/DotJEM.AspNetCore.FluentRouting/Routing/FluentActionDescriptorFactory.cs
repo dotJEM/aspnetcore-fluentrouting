@@ -57,8 +57,6 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
             foreach (IApplicationModelProvider provider in providers.Reverse()) provider.OnProvidersExecuted(context);
             return context.Result;
         }
-
-
     }
 
     public static class FixFaxModelConventions

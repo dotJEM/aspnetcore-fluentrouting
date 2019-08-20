@@ -42,6 +42,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Extentions
             services.TryAddSingleton<IFluentActionDescriptorFactory, FluentActionDescriptorFactory>();
             services.TryAddSingleton<IFluentActionDescriptorCache, FluentActionDescriptorCache>();
             services.TryAddSingleton<ILambdaExecutorDelegateFactory, LambdaExecutorDelegateFactory>();
+            services.TryAddSingleton<ILambdaBinderDelegateFactory, LambdaBinderDelegateFactory>();
+            
 
             services.TryAddEnumerable(ServiceDescriptor.Transient<IActionInvokerProvider, LambdaInvokerProvider>());
             //LambdaInvokerProvider: IActionInvokerProvider

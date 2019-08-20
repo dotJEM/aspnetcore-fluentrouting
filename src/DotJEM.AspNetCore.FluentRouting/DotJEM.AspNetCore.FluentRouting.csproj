@@ -13,11 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <Compile Remove="Routing\Controllers\**" />
+    <EmbeddedResource Remove="Routing\Controllers\**" />
+    <None Remove="Routing\Controllers\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Routing\Controllers\" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
   </ItemGroup>
   
 </Project>

@@ -65,7 +65,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
                 && m.ReturnType != null);
             if (getAwaiterMethod == null)
             {
-                awaitableInfo = default(AwaitableInfo);
+                awaitableInfo = default;
                 return false;
             }
 
@@ -78,7 +78,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
                 && p.GetMethod != null);
             if (isCompletedProperty == null)
             {
-                awaitableInfo = default(AwaitableInfo);
+                awaitableInfo = default;
                 return false;
             }
 
@@ -87,7 +87,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
             bool implementsINotifyCompletion = awaiterInterfaces.Any(t => t == typeof(INotifyCompletion));
             if (!implementsINotifyCompletion)
             {
-                awaitableInfo = default(AwaitableInfo);
+                awaitableInfo = default;
                 return false;
             }
 
@@ -127,7 +127,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
                 && m.GetParameters().Length == 0);
             if (getResultMethod == null)
             {
-                awaitableInfo = default(AwaitableInfo);
+                awaitableInfo = default;
                 return false;
             }
 

@@ -31,10 +31,13 @@ namespace Debugging
 
         public ViewDataDictionary ViewData(string viewName, HttpContext context)
         {
-            return new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) {Model = new Model
+            return new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
             {
-                Message = "FOO IS HERE!"
-            }};
+                Model = new Model
+                {
+                    Message = "FOO IS HERE!"
+                }
+            };
         }
 
         public ITempDataDictionary TempData(string viewName, HttpContext context) => null;

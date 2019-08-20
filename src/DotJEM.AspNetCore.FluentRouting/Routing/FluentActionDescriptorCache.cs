@@ -14,8 +14,8 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
     {
         IEnumerable<ActionDescriptor> Lookup(ControllerRoute route);
         IEnumerable<ActionDescriptor> Lookup(LambdaRoute route);
-
     }
+
     public class FluentActionDescriptorCache : IFluentActionDescriptorCache
     {
         private static readonly ActionDescriptor[] EMPTY_RESULT = new ActionDescriptor[0];

@@ -23,8 +23,6 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing.Lambdas
 
             //Note: Functions cannot have properties.
             BoundProperties = null;
-
-            
         }
 
         private static IEnumerable<ParameterDescriptor> CreateParameterDescriptors(ParameterInfo[] parameters)
@@ -109,26 +107,17 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing.Lambdas
 
         public override bool Equals(object obj)
         {
-            BindingSourceParameter<T> parameter = obj as BindingSourceParameter<T>;
-            if(parameter != null)
+            if(obj is BindingSourceParameter<T> parameter)
                 return EqualityComparer<T>.Default.Equals(Value, parameter.Value);
 
-            if(obj is T)
-                return EqualityComparer<T>.Default.Equals(Value, (T)obj);
+            if(obj is T o)
+                return EqualityComparer<T>.Default.Equals(Value, o);
 
             return false;
         }
 
-        public override int GetHashCode()
-        {
-            return -1937169414 + EqualityComparer<T>.Default.GetHashCode(Value);
-        }
-
-        public override string ToString()
-        {
-            return Value?.ToString();
-        }
-
+        public override int GetHashCode() => -1937169414 + EqualityComparer<T>.Default.GetHashCode(Value);
+        public override string ToString() => Value?.ToString() ?? "<null>";
         public static implicit operator T(BindingSourceParameter<T> parameter) => parameter.Value;
     }
 
@@ -139,12 +128,14 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing.Lambdas
         }
         public static implicit operator FromHeader<T>(T value) => new FromHeader<T>(value);
     }
+
     public class FromServices<T> : BindingSourceParameter<T>{
         public FromServices(T value) : base(value)
         {
         }
         public static implicit operator FromServices<T>(T value) => new FromServices<T>(value);
     }
+
     public class FromRoute<T> : BindingSourceParameter<T>{
         public FromRoute(T value) : base(value)
         {

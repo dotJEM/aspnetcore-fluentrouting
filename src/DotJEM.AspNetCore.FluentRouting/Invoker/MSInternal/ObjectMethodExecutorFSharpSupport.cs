@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -50,7 +51,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
             out Expression coerceToAwaitableExpression,
             out Type awaitableType)
         {
-            var methodReturnGenericType = possibleFSharpAsyncType.IsGenericType
+            Type methodReturnGenericType = possibleFSharpAsyncType.IsGenericType
                 ? possibleFSharpAsyncType.GetGenericTypeDefinition()
                 : null;
 
@@ -61,7 +62,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
                 return false;
             }
 
-            var awaiterResultType = possibleFSharpAsyncType.GetGenericArguments().Single();
+            Type awaiterResultType = possibleFSharpAsyncType.GetGenericArguments().Single();
             awaitableType = typeof(Task<>).MakeGenericType(awaiterResultType);
 
             // coerceToAwaitableExpression = (object fsharpAsync) =>
@@ -71,9 +72,9 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
             //         FSharpOption<TaskCreationOptions>.None,
             //         FSharpOption<CancellationToken>.None);
             // };
-            var startAsTaskClosedMethod = _fsharpAsyncStartAsTaskGenericMethod
+            MethodInfo startAsTaskClosedMethod = _fsharpAsyncStartAsTaskGenericMethod
                 .MakeGenericMethod(awaiterResultType);
-            var coerceToAwaitableParam = Expression.Parameter(typeof(object));
+            ParameterExpression coerceToAwaitableParam = Expression.Parameter(typeof(object));
             coerceToAwaitableExpression = Expression.Lambda(
                 Expression.Convert(
                     Expression.Call(
@@ -89,7 +90,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
 
         private static bool IsFSharpAsyncOpenGenericType(Type possibleFSharpAsyncGenericType)
         {
-            var typeFullName = possibleFSharpAsyncGenericType?.FullName;
+            string typeFullName = possibleFSharpAsyncGenericType?.FullName;
             if (!string.Equals(typeFullName, "Microsoft.FSharp.Control.FSharpAsync`1", StringComparison.Ordinal))
             {
                 return false;
@@ -114,9 +115,9 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
 
         private static bool TryPopulateFSharpValueCaches(Type possibleFSharpAsyncGenericType)
         {
-            var assembly = possibleFSharpAsyncGenericType.Assembly;
-            var fsharpOptionType = assembly.GetType("Microsoft.FSharp.Core.FSharpOption`1");
-            var fsharpAsyncType = assembly.GetType("Microsoft.FSharp.Control.FSharpAsync");
+            Assembly assembly = possibleFSharpAsyncGenericType.Assembly;
+            Type fsharpOptionType = assembly.GetType("Microsoft.FSharp.Core.FSharpOption`1");
+            Type fsharpAsyncType = assembly.GetType("Microsoft.FSharp.Control.FSharpAsync");
 
             if (fsharpOptionType == null || fsharpAsyncType == null)
             {
@@ -124,26 +125,26 @@ namespace DotJEM.AspNetCore.FluentRouting.Invoker.MSInternal
             }
 
             // Get a reference to FSharpOption<TaskCreationOptions>.None
-            var fsharpOptionOfTaskCreationOptionsType = fsharpOptionType
+            Type fsharpOptionOfTaskCreationOptionsType = fsharpOptionType
                 .MakeGenericType(typeof(TaskCreationOptions));
             _fsharpOptionOfTaskCreationOptionsNoneProperty = fsharpOptionOfTaskCreationOptionsType
                 .GetTypeInfo()
                 .GetRuntimeProperty("None");
 
             // Get a reference to FSharpOption<CancellationToken>.None
-            var fsharpOptionOfCancellationTokenType = fsharpOptionType
+            Type fsharpOptionOfCancellationTokenType = fsharpOptionType
                 .MakeGenericType(typeof(CancellationToken));
             _fsharpOptionOfCancellationTokenNoneProperty = fsharpOptionOfCancellationTokenType
                 .GetTypeInfo()
                 .GetRuntimeProperty("None");
 
             // Get a reference to FSharpAsync.StartAsTask<>
-            var fsharpAsyncMethods = fsharpAsyncType
+            IEnumerable<MethodInfo> fsharpAsyncMethods = fsharpAsyncType
                 .GetRuntimeMethods()
                 .Where(m => m.Name.Equals("StartAsTask", StringComparison.Ordinal));
-            foreach (var candidateMethodInfo in fsharpAsyncMethods)
+            foreach (MethodInfo candidateMethodInfo in fsharpAsyncMethods)
             {
-                var parameters = candidateMethodInfo.GetParameters();
+                ParameterInfo[] parameters = candidateMethodInfo.GetParameters();
                 if (parameters.Length == 3
                     && TypesHaveSameIdentity(parameters[0].ParameterType, possibleFSharpAsyncGenericType)
                     && parameters[1].ParameterType == fsharpOptionOfTaskCreationOptionsType

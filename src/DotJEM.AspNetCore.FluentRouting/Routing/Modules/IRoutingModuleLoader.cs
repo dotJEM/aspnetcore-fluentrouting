@@ -40,7 +40,7 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing.Modules
 
         public IRoutingModuleDiscovery LoadFrom(Assembly assembly)
         {
-            var modules = assembly.GetTypes().Where(t => typeof(IRoutingModule).IsAssignableFrom(t));
+            IEnumerable<Type> modules = assembly.GetTypes().Where(t => typeof(IRoutingModule).IsAssignableFrom(t));
 
             return this;
         }

@@ -14,25 +14,18 @@ namespace DotJEM.AspNetCore.FluentRouting.Routing
 {
     public class FluentRouteHandler : IRouter
     {
-        private readonly IServiceProvider serviceProvider;
-
         private readonly ILogger logger;
         private readonly IActionContextAccessor actionContextAccessor;
         private readonly IActionInvokerFactory actionInvokerFactory;
-        private readonly IFluentActionDescriptorCache cache;
         private readonly IActionSelector selector;
 
         public FluentRouteHandler(
             ILoggerFactory loggerFactory, 
-            IServiceProvider serviceProvider,
             IActionInvokerFactory actionInvokerFactory, 
-            IFluentActionDescriptorCache cache, 
             IActionSelector selector, 
             IActionContextAccessor actionContextAccessor = null)
         {
-            this.serviceProvider = serviceProvider;
             this.actionInvokerFactory = actionInvokerFactory;
-            this.cache = cache;
             this.selector = selector;
             this.actionContextAccessor = actionContextAccessor;
             this.logger = loggerFactory.CreateLogger<FluentRouteHandler>();
