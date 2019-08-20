@@ -13,13 +13,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Mvc.ViewFeatures">
-      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.mvc.viewfeatures\2.0.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.ViewFeatures.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\DotJEM.AspNetCore.FluentRouting\DotJEM.AspNetCore.FluentRouting.csproj" />
   </ItemGroup>
 
 </Project>
